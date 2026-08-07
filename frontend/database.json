@@ -1,0 +1,45 @@
+{
+  "donors": [
+    {
+      "id": "3a41b573-6adb-47fe-ad91-492c6c74b496",
+      "name": "Rounak",
+      "age": "60",
+      "gender": "Male",
+      "bloodGroup": "A+",
+      "phone": "696969",
+      "whatsapp": "696969",
+      "email": "rockytysan879@gmail.com",
+      "address": "xyz",
+      "verified": true,
+      "aiNotes": "Records appear legitimate. Blood type matches historical data.",
+      "latitude": 37.78709348553564,
+      "longitude": -122.41178915709432,
+      "createdAt": "2026-08-07T16:40:35.194Z"
+    }
+  ],
+  "hospitals": [
+    {
+      "id": "1",
+      "name": "City Central Hospital",
+      "inventory": []
+    }
+  ],
+  "inventory": [
+    {
+      "id": "1",
+      "hospitalId": "1",
+      "bloodGroup": "A+",
+      "units": 45,
+      "status": "Healthy"
+    },
+    {
+      "id": "2",
+      "hospitalId": "1",
+      "bloodGroup": "O-",
+      "units": 3,
+      "status": "Critical"
+    }
+  ],
+  "recipients": [],
+  "emergencyRequests": []
+}

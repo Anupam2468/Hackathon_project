@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import ChatBox from '../components/ChatBox';
+import { findEmergencyDonors } from '../actions/hospital';
 
 const nearbyHospitals = [
     { id: 1, name: 'City Central Hospital', distance: '1.2 km', hasStock: false },
@@ -16,19 +17,21 @@ export default function RecipientDashboard() {
     const [searchingDonors, setSearchingDonors] = useState(false);
     const [donorFound, setDonorFound] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
+    const [matchedDonors, setMatchedDonors] = useState<any[]>([]);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate getting location
         setTimeout(() => setStep(2), 1000);
     };
 
-    const handleSearchDonors = () => {
+    const handleSearchDonors = async () => {
         setSearchingDonors(true);
-        setTimeout(() => {
-            setSearchingDonors(false);
-            setDonorFound(true);
-        }, 4000);
+        // Call Backend AI Database Matcher server action
+        const donors = await findEmergencyDonors(formData.bloodGroup, 37.77, -122.41);
+
+        setSearchingDonors(false);
+        setMatchedDonors(donors);
+        setDonorFound(true);
     };
 
     return (
@@ -97,31 +100,38 @@ export default function RecipientDashboard() {
                         {searchingDonors && (
                             <div className={styles.trackingOverlay}>
                                 <div className={styles.radar}></div>
-                                <h3>Sending requests to Top 10 Donors...</h3>
+                                <h3>Sending requests to Top 10 Database Donors...</h3>
                                 <p>AI is matching {formData.bloodGroup} & O- profiles...</p>
                             </div>
                         )}
 
-                        {donorFound && (
+                        {donorFound && matchedDonors.length > 0 && (
                             <div className={styles.donorMatch}>
                                 <div className={styles.matchBadge}>Match Found!</div>
                                 <h3>Donor is on their way!</h3>
                                 <div className={styles.donorProfile}>
                                     <div className={styles.avatar}></div>
                                     <div>
-                                        <h4>John (O-)</h4>
-                                        <p>Verified Donor ✓</p>
+                                        <h4>{matchedDonors[0].name} ({matchedDonors[0].bloodGroup})</h4>
+                                        <p>Verified Database Match ✓</p>
                                     </div>
                                 </div>
-                                <p><strong>ETA:</strong> 12 Minutes to Hospital</p>
+                                <p><strong>ETA:</strong> {(matchedDonors[0].distanceKm * 2).toFixed(0)} Minutes to Hospital</p>
                                 <div className={styles.actions}>
                                     <button className="btn-secondary" onClick={() => setChatOpen(true)}>Open Chatbox</button>
                                 </div>
                             </div>
                         )}
 
-                        {chatOpen && (
-                            <ChatBox onClose={() => setChatOpen(false)} partnerName="John" />
+                        {donorFound && matchedDonors.length === 0 && (
+                            <div className={styles.donorMatch}>
+                                <h3>No verified database match found!</h3>
+                                <p>Please wait for another match or contact hospital immediately.</p>
+                            </div>
+                        )}
+
+                        {chatOpen && matchedDonors.length > 0 && (
+                            <ChatBox onClose={() => setChatOpen(false)} partnerName={matchedDonors[0].name} />
                         )}
                     </div>
                 </div>

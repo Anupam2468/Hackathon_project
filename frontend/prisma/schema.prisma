@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Donor {
+  id             String   @id @default(uuid())
+  name           String
+  age            Int
+  gender         String
+  bloodGroup     String
+  phone          String
+  whatsapp       String
+  email          String
+  address        String
+  latitude       Float?
+  longitude      Float?
+  verified       Boolean  @default(false)
+  medicalRecords String?  
+  createdAt      DateTime @default(now())
+}
+
+model Hospital {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  latitude  Float?
+  longitude Float?
+  inventory Inventory[]
+  createdAt DateTime @default(now())
+}
+
+model Inventory {
+  id         String   @id @default(uuid())
+  bloodGroup String
+  units      Int
+  status     String   
+  hospitalId String
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+model Recipient {
+  id         String   @id @default(uuid())
+  name       String
+  age        Int
+  gender     String
+  bloodGroup String
+  phone      String
+  latitude   Float?
+  longitude  Float?
+  createdAt  DateTime @default(now())
+}
+
+model EmergencyRequest {
+  id             String   @id @default(uuid())
+  bloodGroup     String
+  status         String   @default("pending")
+  createdAt      DateTime @default(now())
+}

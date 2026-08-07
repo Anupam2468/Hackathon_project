@@ -37,9 +37,11 @@ export default function Navbar() {
                     </Link>
                 </nav>
 
-                <div className={styles.actions}>
-                    <button className="btn-primary">Emergency Request</button>
-                </div>
+                {pathname !== '/' && !pathname.startsWith('/donor') && (
+                    <div className={styles.actions}>
+                        <button className="btn-primary">Emergency Request</button>
+                    </div>
+                )}
             </div>
         </header>
     );

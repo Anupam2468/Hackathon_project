@@ -44,6 +44,11 @@
     font-size: 1rem;
 }
 
+.form select option {
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+}
+
 .form button {
     margin-top: 1rem;
     padding: 1rem;

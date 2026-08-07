@@ -3,10 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import { registerDonor, loginDonor } from '../actions/donor';
 
-export default function DonorRegistration() {
+export default function DonorAuth() {
     const router = useRouter();
+    const [authMode, setAuthMode] = useState<'selection' | 'login' | 'register'>('selection');
     const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
     const [formData, setFormData] = useState({
         name: '',
         age: '',
@@ -15,24 +19,101 @@ export default function DonorRegistration() {
         phone: '',
         whatsapp: '',
         email: '',
+        password: '',
         address: '',
     });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        // Simulate AI Verification Processing
-        setTimeout(() => {
-            setLoading(false);
-            // Store info locally for hackathon purpose
-            localStorage.setItem('donorProfile', JSON.stringify({ ...formData, verified: false }));
-            router.push('/donor/dashboard');
-        }, 2000);
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
+
+    const handleLoginSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrorMsg('');
+        const result = await loginDonor(formData);
+
+        if (result.success) {
+            localStorage.setItem('donorProfileId', result.donor.id);
+            localStorage.setItem('donorProfile', JSON.stringify(result.donor));
+            router.push('/donor/dashboard');
+        } else {
+            setErrorMsg(result.message || 'Login failed');
+            setLoading(false);
+        }
+    }
+
+    const handleRegisterSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrorMsg('');
+        const result = await registerDonor(formData);
+
+        if (result.success) {
+            localStorage.setItem('donorProfileId', result.donor.id);
+            localStorage.setItem('donorProfile', JSON.stringify(result.donor));
+            router.push('/donor/dashboard');
+        } else {
+            setErrorMsg(result.message || 'Registration failed');
+            setLoading(false);
+        }
+    };
+
+    if (authMode === 'selection') {
+        return (
+            <div className={styles.container}>
+                <div className={styles.formWrapper} style={{ textAlign: 'center' }}>
+                    <h1 className="heading-gradient-red" style={{ marginBottom: '1rem' }}>Welcome Donor</h1>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>Join the LifeFlow network or log back in.</p>
+
+                    <div className={styles.grid} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+                        <button
+                            className="btn-primary"
+                            style={{ width: '80%', padding: '1.2rem', fontSize: '1.2rem' }}
+                            onClick={() => setAuthMode('register')}
+                        >
+                            Create & Verify New Donor
+                        </button>
+                        <button
+                            className="btn-secondary"
+                            style={{ width: '80%', padding: '1.2rem', fontSize: '1.2rem' }}
+                            onClick={() => setAuthMode('login')}
+                        >
+                            Login directly to existing account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (authMode === 'login') {
+        return (
+            <div className={styles.container}>
+                <div className={styles.formWrapper}>
+                    <div className={styles.header}>
+                        <h1 className="heading-gradient-red">Donor Login</h1>
+                        <p>Welcome back.</p>
+                        {errorMsg && <p style={{ color: '#EF4444', marginTop: '1rem' }}>{errorMsg}</p>}
+                    </div>
+                    <form onSubmit={handleLoginSubmit} className={styles.form}>
+                        <div className={styles.formGroup} style={{ width: '100%' }}>
+                            <label>Email Address</label>
+                            <input type="email" name="email" required onChange={handleChange} />
+                        </div>
+                        <div className={styles.formGroup} style={{ width: '100%' }}>
+                            <label>Password</label>
+                            <input type="password" name="password" required onChange={handleChange} />
+                        </div>
+                        <button type="submit" className={`btn-primary ${styles.submitBtn}`} disabled={loading} style={{ marginTop: '2rem' }}>
+                            {loading ? 'Authenticating...' : 'Login'}
+                        </button>
+                        <button type="button" className="btn-secondary" onClick={() => setAuthMode('selection')} style={{ width: '100%', marginTop: '1rem' }}>Back</button>
+                    </form>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className={styles.container}>
@@ -40,9 +121,10 @@ export default function DonorRegistration() {
                 <div className={styles.header}>
                     <h1 className="heading-gradient-red">Donor Registration</h1>
                     <p>Join the LifeFlow network. Your profile will be verified by our AI system.</p>
+                    {errorMsg && <p style={{ color: '#EF4444', marginTop: '1rem' }}>{errorMsg}</p>}
                 </div>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleRegisterSubmit} className={styles.form}>
                     <div className={styles.grid}>
                         <div className={styles.formGroup}>
                             <label>Full Name</label>
@@ -88,6 +170,11 @@ export default function DonorRegistration() {
                         </div>
 
                         <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                            <label>Password</label>
+                            <input type="password" name="password" required placeholder="Enter strong password" onChange={handleChange} />
+                        </div>
+
+                        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                             <label>Address (Real-time Location Based)</label>
                             <textarea name="address" required rows={3} placeholder="123 Lifeline Ave, City, Country" onChange={handleChange} />
                         </div>
@@ -106,6 +193,8 @@ export default function DonorRegistration() {
                     <button type="submit" className={`btn-primary ${styles.submitBtn}`} disabled={loading}>
                         {loading ? 'AI Verifying...' : 'Submit Profile for Verification'}
                     </button>
+
+                    <button type="button" className="btn-secondary" onClick={() => setAuthMode('selection')} style={{ width: '100%', marginTop: '1rem' }}>Back</button>
                 </form>
             </div>
         </div>
