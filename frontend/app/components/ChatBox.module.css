@@ -1,0 +1,126 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chatContainer {
+    background: var(--surface-color);
+    border: var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 450px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.header h3 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.closeBtn {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.closeBtn:hover {
+    color: var(--primary-red);
+}
+
+.messages {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    display: flex;
+}
+
+.message.me {
+    justify-content: flex-end;
+}
+
+.message.partner {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.me .bubble {
+    background: linear-gradient(135deg, var(--primary-red), #F43F5E);
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+.partner .bubble {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-bottom-left-radius: 0;
+}
+
+.inputArea {
+    padding: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 0.75rem;
+}
+
+.input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-full);
+    color: white;
+    font-family: inherit;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-red);
+}
+
+.sendBtn {
+    background: var(--primary-red);
+    color: white;
+    font-weight: 600;
+    padding: 0 1.5rem;
+    border-radius: var(--border-radius-full);
+    transition: all var(--transition-fast);
+}
+
+.sendBtn:hover {
+    background: var(--primary-red-hover);
+}
