@@ -29,6 +29,29 @@
     align-items: center;
 }
 
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.topLeftMenu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.topLink {
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+    font-weight: 500;
+}
+
+.topLink:hover {
+    color: var(--text-primary);
+}
+
 .logo a {
     font-family: 'Outfit', sans-serif;
     font-size: 1.5rem;
@@ -43,6 +66,7 @@
     font-size: 1.6rem;
     background: linear-gradient(135deg, var(--primary-red), #F43F5E);
     -webkit-background-clip: text;
+    background-clip: text;
 }
 
 .nav {

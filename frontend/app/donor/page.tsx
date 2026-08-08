@@ -64,7 +64,7 @@ export default function DonorAuth() {
             <div className={styles.container}>
                 <div className={styles.formWrapper} style={{ textAlign: 'center' }}>
                     <h1 className="heading-gradient-red" style={{ marginBottom: '1rem' }}>Welcome Donor</h1>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>Join the LifeFlow network or log back in.</p>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>Join the FastLIFE network or log back in.</p>
 
                     <div className={styles.grid} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
                         <button
@@ -120,7 +120,7 @@ export default function DonorAuth() {
             <div className={styles.formWrapper}>
                 <div className={styles.header}>
                     <h1 className="heading-gradient-red">Donor Registration</h1>
-                    <p>Join the LifeFlow network. Your profile will be verified by our AI system.</p>
+                    <p>Join the FastLIFE network. Your profile will be verified by our AI system.</p>
                     {errorMsg && <p style={{ color: '#EF4444', marginTop: '1rem' }}>{errorMsg}</p>}
                 </div>
 

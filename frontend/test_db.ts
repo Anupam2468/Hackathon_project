@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
-const adapter = new PrismaBetterSqlite3({ url: 'file:./prisma/dev.db' });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Testing Prisma database models with PrismaBetterSqlite3 adapter...\n');
@@ -109,7 +107,7 @@ async function main() {
   const cert = await prisma.certificate.create({
     data: {
       donation_id: donation.donation_id,
-      pdf_url: 'https://lifeflow.org/certificates/cert_101.pdf',
+      pdf_url: 'https://fastlife.org/certificates/cert_101.pdf',
     },
   });
   console.log('✓ Generated Certificate:', cert.certificate_id, cert.pdf_url);

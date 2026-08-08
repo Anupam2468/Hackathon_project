@@ -3,7 +3,7 @@ import './globals.css';
 import Navbar from './components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'LifeFlow | Blood Donation System',
+  title: 'FastLIFE | Blood Donation System',
   description: 'Connect with donors, hospitals and recipients in real-time.',
 };
 

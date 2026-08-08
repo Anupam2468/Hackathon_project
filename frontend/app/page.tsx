@@ -15,7 +15,7 @@ export default function Home() {
               <span className="heading-gradient-red">Intelligent Connections</span>
             </h1>
             <p className={styles.subtitle}>
-              LifeFlow instantly connects donors, hospitals, and recipients in emergencies.
+              FastLIFE instantly connects donors, hospitals, and recipients in emergencies.
               Verified profiles, real-time inventory matching, and immediate notifications.
             </p>
           </div>
@@ -24,8 +24,8 @@ export default function Home() {
             <Link href="/donor" className="btn-primary">
               Become a Donor
             </Link>
-            <Link href="/recipient" className="btn-secondary">
-              Request Blood
+            <Link href="/recipient" className="btn-secondary" style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}>
+              Recipient
             </Link>
           </div>
         </div>
