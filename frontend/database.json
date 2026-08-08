@@ -12,15 +12,47 @@
       "address": "xyz",
       "verified": true,
       "aiNotes": "Records appear legitimate. Blood type matches historical data.",
-      "latitude": 37.78709348553564,
-      "longitude": -122.41178915709432,
+      "latitude": 37.775,
+      "longitude": -122.419,
       "createdAt": "2026-08-07T16:40:35.194Z"
+    },
+    {
+      "id": "5b52c684-7bec-58ff-be02-503d7d85c507",
+      "name": "Alex Morgan (Universal Donor)",
+      "age": "28",
+      "gender": "Female",
+      "bloodGroup": "O-",
+      "phone": "1234567890",
+      "whatsapp": "1234567890",
+      "email": "alex.morgan@example.com",
+      "address": "123 Hope St",
+      "verified": true,
+      "aiNotes": "Verified Universal O- Donor Record.",
+      "latitude": 37.774,
+      "longitude": -122.418,
+      "createdAt": "2026-08-07T17:00:00.000Z"
     }
   ],
   "hospitals": [
     {
       "id": "1",
       "name": "City Central Hospital",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "inventory": []
+    },
+    {
+      "id": "2",
+      "name": "Metro Health Care",
+      "latitude": 37.785,
+      "longitude": -122.41,
+      "inventory": []
+    },
+    {
+      "id": "3",
+      "name": "LifeLine Emergency Hospital",
+      "latitude": 37.768,
+      "longitude": -122.425,
       "inventory": []
     }
   ],
@@ -38,6 +70,27 @@
       "bloodGroup": "O-",
       "units": 3,
       "status": "Critical"
+    },
+    {
+      "id": "3",
+      "hospitalId": "2",
+      "bloodGroup": "B+",
+      "units": 15,
+      "status": "Healthy"
+    },
+    {
+      "id": "4",
+      "hospitalId": "2",
+      "bloodGroup": "O-",
+      "units": 8,
+      "status": "Healthy"
+    },
+    {
+      "id": "5",
+      "hospitalId": "3",
+      "bloodGroup": "AB+",
+      "units": 10,
+      "status": "Healthy"
     }
   ],
   "recipients": [],

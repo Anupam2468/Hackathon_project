@@ -4,60 +4,116 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
-}
-
-model Donor {
-  id             String   @id @default(uuid())
-  name           String
-  age            Int
-  gender         String
-  bloodGroup     String
-  phone          String
-  whatsapp       String
-  email          String
-  address        String
-  latitude       Float?
-  longitude      Float?
-  verified       Boolean  @default(false)
-  medicalRecords String?  
-  createdAt      DateTime @default(now())
 }
 
 model Hospital {
-  id        String   @id @default(uuid())
-  name      String
-  address   String
-  latitude  Float?
-  longitude Float?
-  inventory Inventory[]
-  createdAt DateTime @default(now())
+  hospital_id    String         @id @default(uuid())
+  name           String
+  location       String
+  verified_badge Boolean        @default(false)
+  doctors        Doctor[]
+  blood_stocks   BloodStock[]
+  camps          Camp[]
+  donations      Donation[]
+  blood_requests BloodRequest[]
 }
 
-model Inventory {
-  id         String   @id @default(uuid())
-  bloodGroup String
-  units      Int
-  status     String   
-  hospitalId String
-  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+model Doctor {
+  doctor_id      String     @id @default(uuid())
+  hospital_id    String
+  hospital       Hospital   @relation(fields: [hospital_id], references: [hospital_id])
+  name           String
+  verified_badge Boolean    @default(false)
+  donations      Donation[]
 }
 
-model Recipient {
-  id         String   @id @default(uuid())
-  name       String
-  age        Int
-  gender     String
-  bloodGroup String
-  phone      String
-  latitude   Float?
-  longitude  Float?
-  createdAt  DateTime @default(now())
+model BloodStock {
+  stock_id        String   @id @default(uuid())
+  hospital_id     String
+  hospital        Hospital @relation(fields: [hospital_id], references: [hospital_id])
+  blood_group     String
+  units_available Int
 }
 
-model EmergencyRequest {
-  id             String   @id @default(uuid())
-  bloodGroup     String
-  status         String   @default("pending")
-  createdAt      DateTime @default(now())
+model Camp {
+  camp_id     String   @id @default(uuid())
+  hospital_id String
+  hospital    Hospital @relation(fields: [hospital_id], references: [hospital_id])
+  location    String
+  camp_date   DateTime
+}
+
+model Patient {
+  patient_id     String         @id @default(uuid())
+  name           String
+  contact        String
+  blood_requests BloodRequest[]
+}
+
+model Donor {
+  donor_id              String                @id @default(uuid())
+  name                  String
+  blood_group           String
+  age                   Int
+  weight                Float
+  last_donation_date    DateTime?
+  eligibility_status    String
+  verified_badge        Boolean               @default(false)
+  contact               String
+  health_questionnaires HealthQuestionnaire[]
+  blood_requests        BloodRequest[]
+  notifications         Notification[]
+  donations             Donation[]
+}
+
+model HealthQuestionnaire {
+  questionnaire_id String  @id @default(uuid())
+  donor_id         String
+  donor            Donor   @relation(fields: [donor_id], references: [donor_id])
+  weight           Float
+  age              Int
+  medical_history  String
+  eligible         Boolean
+}
+
+model BloodRequest {
+  request_id  String    @id @default(uuid())
+  patient_id  String?
+  patient     Patient?  @relation(fields: [patient_id], references: [patient_id])
+  hospital_id String?
+  hospital    Hospital? @relation(fields: [hospital_id], references: [hospital_id])
+  donor_id    String?
+  donor       Donor?    @relation(fields: [donor_id], references: [donor_id])
+  blood_group String
+  status      String
+}
+
+model Notification {
+  notification_id String   @id @default(uuid())
+  donor_id        String
+  donor           Donor    @relation(fields: [donor_id], references: [donor_id])
+  type            String
+  sent_date       DateTime @default(now())
+}
+
+model Donation {
+  donation_id     String        @id @default(uuid())
+  donor_id        String
+  donor           Donor         @relation(fields: [donor_id], references: [donor_id])
+  hospital_id     String
+  hospital        Hospital      @relation(fields: [hospital_id], references: [hospital_id])
+  doctor_id       String
+  doctor          Doctor        @relation(fields: [doctor_id], references: [doctor_id])
+  donation_date   DateTime      @default(now())
+  lab_test_result String
+  status          String
+  certificates    Certificate[]
+}
+
+model Certificate {
+  certificate_id String   @id @default(uuid())
+  donation_id    String
+  donation       Donation @relation(fields: [donation_id], references: [donation_id])
+  pdf_url        String
+  generated_date DateTime @default(now())
 }

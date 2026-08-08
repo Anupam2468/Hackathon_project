@@ -18,6 +18,7 @@ export default function RecipientDashboard() {
     const [donorFound, setDonorFound] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
     const [matchedDonors, setMatchedDonors] = useState<any[]>([]);
+    const [searchResult, setSearchResult] = useState<any>(null);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,10 +28,11 @@ export default function RecipientDashboard() {
     const handleSearchDonors = async () => {
         setSearchingDonors(true);
         // Call Backend AI Database Matcher server action
-        const donors = await findEmergencyDonors(formData.bloodGroup, 37.77, -122.41);
+        const result = await findEmergencyDonors(formData.bloodGroup, 37.77, -122.41);
 
         setSearchingDonors(false);
-        setMatchedDonors(donors);
+        setSearchResult(result);
+        setMatchedDonors(result.donors || []);
         setDonorFound(true);
     };
 
@@ -100,33 +102,81 @@ export default function RecipientDashboard() {
                         {searchingDonors && (
                             <div className={styles.trackingOverlay}>
                                 <div className={styles.radar}></div>
-                                <h3>Sending requests to Top 10 Database Donors...</h3>
-                                <p>AI is matching {formData.bloodGroup} & O- profiles...</p>
+                                <h3>Executing 5-Stage Hospital Emergency Search...</h3>
+                                <p>Scanning: 1. Primary Stock -> 2. Primary O- -> 3. Nearby Hospitals -> 4. 5km Donors -> 5. WhatsApp Broadcast</p>
                             </div>
                         )}
 
-                        {donorFound && matchedDonors.length > 0 && (
-                            <div className={styles.donorMatch}>
-                                <div className={styles.matchBadge}>Match Found!</div>
-                                <h3>Donor is on their way!</h3>
-                                <div className={styles.donorProfile}>
-                                    <div className={styles.avatar}></div>
-                                    <div>
-                                        <h4>{matchedDonors[0].name} ({matchedDonors[0].bloodGroup})</h4>
-                                        <p>Verified Database Match ✓</p>
+                        {donorFound && searchResult && (
+                            <div style={{ marginTop: '1.5rem' }}>
+                                {/* Stage Badge */}
+                                <div style={{
+                                    display: 'inline-block',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '20px',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    marginBottom: '1rem',
+                                    background: searchResult.stage === 5 ? '#25D366' : '#10B981',
+                                    color: '#000'
+                                }}>
+                                    {searchResult.stageTitle || 'Emergency Search Result'}
+                                </div>
+
+                                {/* Stages 1, 2, 3: Hospital Inventory Match */}
+                                {searchResult.stage >= 1 && searchResult.stage <= 3 && (
+                                    <div className={styles.donorMatch} style={{ border: '2px solid #10B981', background: 'rgba(16, 185, 129, 0.08)' }}>
+                                        <h3 style={{ color: '#10B981' }}>🏥 {searchResult.matchType}</h3>
+                                        <p style={{ color: '#E2E8F0', fontSize: '1.1rem', marginTop: '0.5rem' }}>{searchResult.message}</p>
+                                        <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', textAlign: 'left' }}>
+                                            <p>📍 <strong>Hospital:</strong> {searchResult.hospitalName}</p>
+                                            <p>🩸 <strong>Blood Type:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{searchResult.bloodGroup}</span></p>
+                                            <p>📦 <strong>Stock Available:</strong> {searchResult.unitsAvailable} Units</p>
+                                            {searchResult.distanceKm && <p>🚗 <strong>Distance:</strong> {searchResult.distanceKm.toFixed(1)} km away</p>}
+                                        </div>
                                     </div>
-                                </div>
-                                <p><strong>ETA:</strong> {(matchedDonors[0].distanceKm * 2).toFixed(0)} Minutes to Hospital</p>
-                                <div className={styles.actions}>
-                                    <button className="btn-secondary" onClick={() => setChatOpen(true)}>Open Chatbox</button>
-                                </div>
-                            </div>
-                        )}
+                                )}
 
-                        {donorFound && matchedDonors.length === 0 && (
-                            <div className={styles.donorMatch}>
-                                <h3>No verified database match found!</h3>
-                                <p>Please wait for another match or contact hospital immediately.</p>
+                                {/* Stage 4: Nearby Donor Match within 5km */}
+                                {searchResult.stage === 4 && matchedDonors.length > 0 && (
+                                    <div className={styles.donorMatch}>
+                                        <h3>🤝 Donor is on their way!</h3>
+                                        <p style={{ color: '#E2E8F0', marginBottom: '1rem' }}>{searchResult.message}</p>
+                                        <div className={styles.donorProfile}>
+                                            <div className={styles.avatar}></div>
+                                            <div>
+                                                <h4>{matchedDonors[0].name} ({matchedDonors[0].bloodGroup})</h4>
+                                                <p style={{ color: matchedDonors[0].isUniversalFallback ? '#F59E0B' : '#10B981', fontWeight: 'bold' }}>
+                                                    {matchedDonors[0].matchType} (📍 {matchedDonors[0].distanceKm.toFixed(1)} km away) ✓
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p><strong>ETA:</strong> {(matchedDonors[0].distanceKm * 2).toFixed(0)} Minutes to Hospital</p>
+                                        <div className={styles.actions}>
+                                            <button className="btn-secondary" onClick={() => setChatOpen(true)}>Open Chatbox</button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Stage 5: Automated Emergency WhatsApp Broadcast */}
+                                {searchResult.stage === 5 && (
+                                    <div className={styles.donorMatch} style={{ border: '2px solid #25D366', background: 'rgba(37, 211, 102, 0.08)' }}>
+                                        <h3 style={{ color: '#25D366' }}>📲 Automated WhatsApp Broadcast Dispatched!</h3>
+                                        <p style={{ color: '#E2E8F0', marginTop: '0.5rem', fontSize: '1.05rem' }}>{searchResult.message}</p>
+
+                                        {searchResult.alertedDonors && searchResult.alertedDonors.length > 0 && (
+                                            <div style={{ marginTop: '1.2rem', textAlign: 'left', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px' }}>
+                                                <h4 style={{ color: '#25D366', marginBottom: '0.5rem', fontSize: '0.95rem' }}>Active Donors Notified via WhatsApp:</h4>
+                                                {searchResult.alertedDonors.map((d: any) => (
+                                                    <div key={d.id} style={{ fontSize: '0.9rem', color: '#E2E8F0', display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                                        <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
+                                                        <span style={{ color: '#25D366', fontWeight: 'bold' }}>✓ Message Sent ({d.whatsapp})</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
 

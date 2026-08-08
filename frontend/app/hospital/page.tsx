@@ -2,11 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
-import { getHospitalInventory } from '../actions/hospital';
+import { getHospitalInventory, findEmergencyDonors } from '../actions/hospital';
 
 export default function HospitalDashboard() {
-    const [activeTab, setActiveTab] = useState<'inventory' | 'needy' | 'donors'>('inventory');
+    const [activeTab, setActiveTab] = useState<'inventory' | 'needy' | 'donors' | 'search'>('inventory');
     const [inventory, setInventory] = useState<any[]>([]);
+    const [selectedBloodGroup, setSelectedBloodGroup] = useState('A+');
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchResult, setSearchResult] = useState<any>(null);
+
+    const handleHospitalSearch = async (bloodType: string) => {
+        setIsSearching(true);
+        setSelectedBloodGroup(bloodType);
+        const result = await findEmergencyDonors(bloodType, 37.7749, -122.4194, '1');
+        setIsSearching(false);
+        setSearchResult(result);
+    };
 
     // Simulated requests for the Blood Needy tab
     const activeRequests = [
@@ -54,6 +65,12 @@ export default function HospitalDashboard() {
                     onClick={() => setActiveTab('donors')}
                 >
                     3. Available Donors
+                </button>
+                <button
+                    className={activeTab === 'search' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => setActiveTab('search')}
+                >
+                    🚨 4. 5-Stage Emergency Blood Search
                 </button>
             </div>
 
@@ -132,6 +149,95 @@ export default function HospitalDashboard() {
                             </div>
                         ))}
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'search' && (
+                <div className={styles.donorsPanel} style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <h2 style={{ marginBottom: '0.5rem', color: '#EF4444' }}>🚨 5-Stage Hospital Emergency Search Engine</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                        Executes sequential 5-stage fallback: 1. Primary Hospital Stock (Exact) &rarr; 2. Primary Hospital (O-) &rarr; 3. Nearby Hospitals Stock &rarr; 4. Donors (5km) &rarr; 5. Automated Emergency WhatsApp Broadcast
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 'bold' }}>Select Required Blood Group:</span>
+                        {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                            <button
+                                key={bg}
+                                className={selectedBloodGroup === bg ? 'btn-primary' : 'btn-secondary'}
+                                style={{ padding: '0.5rem 1.2rem' }}
+                                onClick={() => handleHospitalSearch(bg)}
+                            >
+                                {bg}
+                            </button>
+                        ))}
+                    </div>
+
+                    {isSearching && (
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '8px', textAlign: 'center' }}>
+                            <div className={styles.radar} style={{ margin: '0 auto 1rem auto' }}></div>
+                            <h3>Executing 5-Stage Sequential Emergency Scan for {selectedBloodGroup}...</h3>
+                            <p style={{ color: 'var(--text-secondary)' }}>Checking Hospital Inventories & Distance Radius...</p>
+                        </div>
+                    )}
+
+                    {!isSearching && searchResult && (
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{
+                                display: 'inline-block',
+                                padding: '0.4rem 1rem',
+                                borderRadius: '20px',
+                                fontWeight: 'bold',
+                                fontSize: '0.95rem',
+                                marginBottom: '1rem',
+                                background: searchResult.stage === 5 ? '#25D366' : '#10B981',
+                                color: '#000'
+                            }}>
+                                {searchResult.stageTitle}
+                            </div>
+
+                            <h3 style={{ fontSize: '1.4rem', color: searchResult.stage === 5 ? '#25D366' : '#10B981', marginBottom: '0.5rem' }}>
+                                {searchResult.matchType}
+                            </h3>
+                            <p style={{ color: '#E2E8F0', fontSize: '1.1rem', marginBottom: '1.5rem' }}>{searchResult.message}</p>
+
+                            {/* Stages 1, 2, 3: Hospital Inventory Match */}
+                            {searchResult.stage >= 1 && searchResult.stage <= 3 && (
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+                                    <p style={{ margin: '0.3rem 0' }}>📍 <strong>Matched Hospital:</strong> {searchResult.hospitalName}</p>
+                                    <p style={{ margin: '0.3rem 0' }}>🩸 <strong>Blood Type:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{searchResult.bloodGroup}</span></p>
+                                    <p style={{ margin: '0.3rem 0' }}>📦 <strong>Units Available:</strong> {searchResult.unitsAvailable} Units</p>
+                                    {searchResult.distanceKm && <p style={{ margin: '0.3rem 0' }}>🚗 <strong>Distance:</strong> {searchResult.distanceKm.toFixed(1)} km away</p>}
+                                </div>
+                            )}
+
+                            {/* Stage 4: Donor Match within 5km */}
+                            {searchResult.stage === 4 && searchResult.donors && searchResult.donors.length > 0 && (
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
+                                    <h4 style={{ color: '#F59E0B', marginBottom: '0.8rem' }}>Matched Nearby Individual Donors (Within 5 km):</h4>
+                                    {searchResult.donors.map((d: any) => (
+                                        <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
+                                            <span>📍 {d.distanceKm.toFixed(1)} km away | Contact: {d.phone}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Stage 5: WhatsApp Emergency Broadcast Dispatched */}
+                            {searchResult.stage === 5 && (
+                                <div style={{ background: 'rgba(37,211,102,0.1)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #25D366' }}>
+                                    <h4 style={{ color: '#25D366', marginBottom: '0.8rem' }}>📲 Emergency WhatsApp Broadcast Logs:</h4>
+                                    {searchResult.alertedDonors && searchResult.alertedDonors.map((d: any) => (
+                                        <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
+                                            <span style={{ color: '#25D366', fontWeight: 'bold' }}>✓ WhatsApp Alert Sent ({d.whatsapp})</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
