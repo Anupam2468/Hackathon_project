@@ -238,3 +238,139 @@
         text-align: center;
     }
 }
+
+/* ---- New mobile-ready classes ---- */
+
+.tabRow {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.panelCard {
+    background: var(--surface-color);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.cardList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cardItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-color-glass);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    gap: 1rem;
+}
+
+.cardItemInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.cardItemActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.typeBadge {
+    font-size: 0.8rem;
+    background: var(--surface-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 90px 1rem 3rem;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+
+    .tabRow {
+        gap: 0.5rem;
+    }
+
+    .tabRow button {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .panelCard {
+        padding: 1rem;
+    }
+
+    .cardItem {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .cardItemActions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .inventoryGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .invCard h3 {
+        font-size: 1.5rem;
+    }
+
+    .units {
+        font-size: 1.75rem;
+    }
+
+    .donorItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* Light theme overrides */
+:global(body.light-theme) .insightCard {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .invCard {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .searchOverlay {
+    background: rgba(255, 246, 229, 0.95);
+}
+
+:global(body.light-theme) .donorItem {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}

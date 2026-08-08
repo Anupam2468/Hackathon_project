@@ -44,12 +44,14 @@ body {
   overflow-x: hidden;
 }
 
+html,
 body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 h1,
@@ -135,11 +137,12 @@ button {
 }
 
 /* Light Theme */
-body.light-theme {
-  --bg-color: #FDFBF7;
-  /* Creamy white */
+body.light-theme,
+html.light-theme {
+  --bg-color: #FFF6E5;
+  /* Noticeable Creamy white */
   --surface-color: #FFFFFF;
-  --surface-color-glass: rgba(255, 255, 255, 0.85);
+  --surface-color-glass: rgba(255, 255, 255, 0.75);
 
   --text-primary: #0F172A;
   --text-secondary: #475569;
@@ -147,8 +150,42 @@ body.light-theme {
   --border-color: rgba(0, 0, 0, 0.08);
   --glass-border: 1px solid rgba(0, 0, 0, 0.08);
 
+  --shadow-glow: 0 0 20px rgba(225, 29, 72, 0.15);
+
   --gradient-start: #0F172A;
   --gradient-end: #475569;
+}
+
+/* Light theme: fix hardcoded dark backgrounds on inline-styled elements */
+body.light-theme [style*="rgba(0,0,0"],
+body.light-theme [style*="rgba(0, 0, 0"] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-theme [style*="background: '#333'"],
+body.light-theme [style*="background: '#1e293b'"] {
+  background: var(--surface-color) !important;
+}
+
+/* Light theme: override hardcoded light-on-dark text colors */
+body.light-theme [style*="color: '#E2E8F0'"],
+body.light-theme [style*="color: '#e2e8f0'"] {
+  color: var(--text-primary) !important;
+}
+
+body.light-theme [style*="rgba(255,255,255,0.1"],
+body.light-theme [style*="rgba(255, 255, 255, 0.1"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Light theme: fix btn-secondary hover */
+body.light-theme .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Light theme: fix glass-panel styling */
+body.light-theme .glass-panel {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* Theme Toggle Slider */
@@ -166,9 +203,13 @@ body.light-theme {
 }
 
 .theme-switch input {
+  position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 5;
 }
 
 .slider {

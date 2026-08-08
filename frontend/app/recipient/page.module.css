@@ -39,7 +39,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1rem;
     border-radius: var(--border-radius-sm);
-    color: white;
+    color: var(--text-primary);
     font-family: inherit;
     font-size: 1rem;
 }
@@ -214,6 +214,18 @@
 }
 
 @media (max-width: 600px) {
+    .container {
+        padding: 90px 1rem 3rem;
+    }
+
+    .onboarding {
+        padding: 1.5rem;
+    }
+
+    .onboarding h1 {
+        font-size: 1.5rem;
+    }
+
     .hospitalCard {
         flex-direction: column;
         align-items: flex-start;
@@ -223,4 +235,26 @@
     .hospStatus {
         align-items: flex-start;
     }
+
+    .dashboard h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Light theme overrides */
+:global(body.light-theme) .form input,
+:global(body.light-theme) .form select {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-primary);
+}
+
+:global(body.light-theme) .trackingOverlay {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .donorMatch {
+    background: rgba(16, 185, 129, 0.06);
+    border-color: rgba(16, 185, 129, 0.2);
 }

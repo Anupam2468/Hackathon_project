@@ -47,30 +47,30 @@ export default function HospitalDashboard() {
                 </div>
             </header>
 
-            <div className={styles.tabs} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
+            <div className={styles.tabRow}>
                 <button
                     className={activeTab === 'inventory' ? 'btn-primary' : 'btn-secondary'}
                     onClick={() => setActiveTab('inventory')}
                 >
-                    1. Blood Inventory Manager
+                    Inventory
                 </button>
                 <button
                     className={activeTab === 'needy' ? 'btn-primary' : 'btn-secondary'}
                     onClick={() => setActiveTab('needy')}
                 >
-                    2. Blood Needy (Requests)
+                    Requests
                 </button>
                 <button
                     className={activeTab === 'donors' ? 'btn-primary' : 'btn-secondary'}
                     onClick={() => setActiveTab('donors')}
                 >
-                    3. Available Donors
+                    Donors
                 </button>
                 <button
                     className={activeTab === 'search' ? 'btn-primary' : 'btn-secondary'}
                     onClick={() => setActiveTab('search')}
                 >
-                    🚨 4. 5-Stage Emergency Blood Search
+                    🚨 Emergency
                 </button>
             </div>
 
@@ -106,22 +106,22 @@ export default function HospitalDashboard() {
             )}
 
             {activeTab === 'needy' && (
-                <div className={styles.needyPanel} style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className={styles.panelCard}>
                     <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary-red)' }}>Incoming Blood Requests</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Patients and nearby hospitals requesting emergency blood transfers.</p>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className={styles.cardList}>
                         {activeRequests.map(req => (
-                            <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem 1.5rem', borderRadius: '8px' }}>
-                                <div>
-                                    <span style={{ fontSize: '0.8rem', background: '#333', padding: '0.2rem 0.5rem', borderRadius: '4px', marginRight: '1rem' }}>{req.type}</span>
-                                    <strong style={{ fontSize: '1.2rem', marginRight: '1rem' }}>{req.name}</strong>
+                            <div key={req.id} className={styles.cardItem}>
+                                <div className={styles.cardItemInfo}>
+                                    <span className={styles.typeBadge}>{req.type}</span>
+                                    <strong>{req.name}</strong>
                                     <span style={{ color: '#EF4444', fontWeight: 'bold' }}>Needs {req.bloodGroup}</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                <div className={styles.cardItemActions}>
                                     <span style={{ color: req.urgency === 'Critical' ? '#EF4444' : '#F59E0B' }}>{req.urgency}</span>
-                                    <span style={{ color: 'var(--text-secondary)' }}>{req.time}</span>
-                                    <button className="btn-primary" style={{ padding: '0.5rem 1rem' }}>Review Request</button>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{req.time}</span>
+                                    <button className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>Review</button>
                                 </div>
                             </div>
                         ))}
@@ -130,21 +130,21 @@ export default function HospitalDashboard() {
             )}
 
             {activeTab === 'donors' && (
-                <div className={styles.donorsPanel} style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className={styles.panelCard}>
                     <h2 style={{ marginBottom: '1.5rem', color: '#10B981' }}>Willing Donors Directory</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Verified local donors ready to be dispatched during emergencies.</p>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className={styles.cardList}>
                         {availableDonors.map(donor => (
-                            <div key={donor.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem 1.5rem', borderRadius: '8px' }}>
-                                <div>
-                                    <strong style={{ fontSize: '1.2rem', marginRight: '1rem' }}>{donor.name}</strong>
-                                    <span style={{ background: '#1e293b', padding: '0.2rem 0.5rem', borderRadius: '4px', marginRight: '1rem' }}>Blood Group: {donor.bloodGroup}</span>
+                            <div key={donor.id} className={styles.cardItem}>
+                                <div className={styles.cardItemInfo}>
+                                    <strong>{donor.name}</strong>
+                                    <span className={styles.typeBadge}>{donor.bloodGroup}</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                                    <span style={{ color: donor.verified ? '#10B981' : '#F59E0B' }}>{donor.verified ? '✓ AI Verified' : '⏳ Pending Proof'}</span>
-                                    <span style={{ color: 'var(--text-secondary)' }}>Last cycle: {donor.lastDonation}</span>
-                                    <button className="btn-secondary" style={{ padding: '0.5rem 1rem' }} disabled={!donor.verified}>Ping Donor</button>
+                                <div className={styles.cardItemActions}>
+                                    <span style={{ color: donor.verified ? '#10B981' : '#F59E0B', fontSize: '0.85rem' }}>{donor.verified ? '✓ AI Verified' : '⏳ Pending'}</span>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Last: {donor.lastDonation}</span>
+                                    <button className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }} disabled={!donor.verified}>Ping</button>
                                 </div>
                             </div>
                         ))}
@@ -153,7 +153,7 @@ export default function HospitalDashboard() {
             )}
 
             {activeTab === 'search' && (
-                <div className={styles.donorsPanel} style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className={styles.panelCard}>
                     <h2 style={{ marginBottom: '0.5rem', color: '#EF4444' }}>🚨 5-Stage Hospital Emergency Search Engine</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                         Executes sequential 5-stage fallback: 1. Primary Hospital Stock (Exact) &rarr; 2. Primary Hospital (O-) &rarr; 3. Nearby Hospitals Stock &rarr; 4. Donors (5km) &rarr; 5. Automated Emergency WhatsApp Broadcast

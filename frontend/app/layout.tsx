@@ -14,6 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#0F172A" />
+      </head>
       <body>
         <Navbar />
         <main>{children}</main>

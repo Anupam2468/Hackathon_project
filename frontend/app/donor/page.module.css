@@ -115,3 +115,36 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 768px) {
+    .container {
+        padding: 90px 1rem 3rem;
+    }
+
+    .formWrapper {
+        padding: 1.5rem;
+    }
+
+    .formWrapper h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Light theme overrides */
+:global(body.light-theme) .formWrapper {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .formGroup input:not([type="file"]),
+:global(body.light-theme) .formGroup select,
+:global(body.light-theme) .formGroup textarea {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-primary);
+}
+
+:global(body.light-theme) .fileInput {
+    background: rgba(0, 0, 0, 0.01);
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+}

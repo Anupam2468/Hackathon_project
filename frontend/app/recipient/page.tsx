@@ -103,7 +103,7 @@ export default function RecipientDashboard() {
                             <div className={styles.trackingOverlay}>
                                 <div className={styles.radar}></div>
                                 <h3>Executing 5-Stage Hospital Emergency Search...</h3>
-                                <p>Scanning: 1. Primary Stock -> 2. Primary O- -> 3. Nearby Hospitals -> 4. 5km Donors -> 5. WhatsApp Broadcast</p>
+                                <p>Scanning: 1. Primary Stock → 2. Primary O- → 3. Nearby Hospitals → 4. 5km Donors → 5. WhatsApp Broadcast</p>
                             </div>
                         )}
 
