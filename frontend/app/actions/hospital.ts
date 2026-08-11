@@ -1,5 +1,6 @@
 'use server';
-import { getDb } from '../db/database';
+import { prisma } from '../db/database';
+import { maskDonorForHospital, maskBroadcastResult, sanitizeSearchResult } from '../db/privacy';
 
 // Haversine formula to calculate distance between two Geo-points
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -13,9 +14,18 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     return R * c;
 }
 
-export async function getHospitalInventory(hospitalId: string = '1') {
-    const db = getDb();
-    return db.inventory.filter(inv => inv.hospitalId === hospitalId);
+export async function getHospitalInventory(hospitalId: string = 'h1') {
+    const stocks = await prisma.bloodStock.findMany({
+        where: { hospitalId: hospitalId }
+    });
+
+    return stocks.map(s => ({
+        id: s.id,
+        hospitalId: s.hospitalId,
+        bloodGroup: s.bloodGroup,
+        units: s.unitsAvailable,
+        status: s.unitsAvailable > 10 ? 'Healthy' : s.unitsAvailable > 3 ? 'Low' : 'Critical',
+    }));
 }
 
 // 5-Stage Hospital Segment Emergency Blood Search Engine
@@ -23,21 +33,25 @@ export async function findEmergencyDonors(
     requiredBloodGroup: string,
     lat: number,
     lon: number,
-    hospitalId: string = '1'
+    hospitalId: string = 'h1'
 ) {
-    const db = getDb();
     const MAX_DONOR_DISTANCE_KM = 5.0;
 
-    const currentHospital = db.hospitals.find(h => h.id === hospitalId) || db.hospitals[0] || { id: '1', name: 'City Central Hospital' };
+    // Get current hospital
+    const currentHospital = await prisma.hospital.findUnique({ where: { id: hospitalId } })
+        || await prisma.hospital.findFirst()
+        || { id: 'h1', name: 'City Central Hospital', latitude: null, longitude: null };
 
     // =========================================================================
     // STAGE 1: Primary Hospital Stock - Specific Blood Type (Exact Match)
     // =========================================================================
-    const primaryExactStock = db.inventory.find(
-        inv => inv.hospitalId === currentHospital.id &&
-               inv.bloodGroup === requiredBloodGroup &&
-               inv.units > 0
-    );
+    const primaryExactStock = await prisma.bloodStock.findFirst({
+        where: {
+            hospitalId: currentHospital.id,
+            bloodGroup: requiredBloodGroup,
+            unitsAvailable: { gt: 0 }
+        }
+    });
 
     if (primaryExactStock) {
         return {
@@ -47,21 +61,23 @@ export async function findEmergencyDonors(
             matchType: 'Primary Hospital Stock (Exact Match)',
             hospitalName: currentHospital.name,
             bloodGroup: primaryExactStock.bloodGroup,
-            unitsAvailable: primaryExactStock.units,
+            unitsAvailable: primaryExactStock.unitsAvailable,
             donors: [],
             whatsappBroadcastSent: false,
-            message: `Exact match (${requiredBloodGroup}) available in primary hospital inventory (${primaryExactStock.units} units).`
+            message: `Exact match (${requiredBloodGroup}) available in primary hospital inventory (${primaryExactStock.unitsAvailable} units).`
         };
     }
 
     // =========================================================================
     // STAGE 2: Primary Hospital Stock - Universal Blood Type 'O-'
     // =========================================================================
-    const primaryUniversalStock = db.inventory.find(
-        inv => inv.hospitalId === currentHospital.id &&
-               inv.bloodGroup === 'O-' &&
-               inv.units > 0
-    );
+    const primaryUniversalStock = await prisma.bloodStock.findFirst({
+        where: {
+            hospitalId: currentHospital.id,
+            bloodGroup: 'O-',
+            unitsAvailable: { gt: 0 }
+        }
+    });
 
     if (primaryUniversalStock) {
         return {
@@ -71,34 +87,32 @@ export async function findEmergencyDonors(
             matchType: 'Primary Hospital Stock (Universal O-)',
             hospitalName: currentHospital.name,
             bloodGroup: 'O-',
-            unitsAvailable: primaryUniversalStock.units,
+            unitsAvailable: primaryUniversalStock.unitsAvailable,
             donors: [],
             whatsappBroadcastSent: false,
-            message: `Requested blood (${requiredBloodGroup}) out of stock in hospital. Found Universal O- stock (${primaryUniversalStock.units} units) in primary hospital.`
+            message: `Requested blood (${requiredBloodGroup}) out of stock. Found Universal O- stock (${primaryUniversalStock.unitsAvailable} units).`
         };
     }
 
     // =========================================================================
-    // STAGE 3: Nearby Hospitals Inventory Search (Exact Match & Universal O-)
+    // STAGE 3: Nearby Hospitals Inventory Search
     // =========================================================================
-    const otherHospitals = db.hospitals
-        .filter(h => h.id !== currentHospital.id)
-        .map(h => {
-            const hLat = h.latitude || (lat + 0.01);
-            const hLon = h.longitude || (lon + 0.01);
-            return {
-                ...h,
-                distanceKm: calculateDistance(lat, lon, hLat, hLon)
-            };
-        })
+    const allHospitals = await prisma.hospital.findMany({
+        where: { id: { not: currentHospital.id } },
+        include: { bloodStocks: true }
+    });
+
+    const otherHospitals = allHospitals
+        .map(h => ({
+            ...h,
+            distanceKm: calculateDistance(lat, lon, h.latitude || lat, h.longitude || lon)
+        }))
         .sort((a, b) => a.distanceKm - b.distanceKm);
 
-    // 3a. Search specific blood type in nearby hospitals
+    // 3a. Exact match in nearby hospitals
     for (const hosp of otherHospitals) {
-        const exactStock = db.inventory.find(
-            inv => inv.hospitalId === hosp.id &&
-                   inv.bloodGroup === requiredBloodGroup &&
-                   inv.units > 0
+        const exactStock = hosp.bloodStocks.find(
+            s => s.bloodGroup === requiredBloodGroup && s.unitsAvailable > 0
         );
         if (exactStock) {
             return {
@@ -109,20 +123,18 @@ export async function findEmergencyDonors(
                 hospitalName: hosp.name,
                 distanceKm: hosp.distanceKm,
                 bloodGroup: exactStock.bloodGroup,
-                unitsAvailable: exactStock.units,
+                unitsAvailable: exactStock.unitsAvailable,
                 donors: [],
                 whatsappBroadcastSent: false,
-                message: `Found exact match (${requiredBloodGroup}) in nearby hospital: ${hosp.name} (${hosp.distanceKm.toFixed(1)} km away, ${exactStock.units} units).`
+                message: `Found exact match (${requiredBloodGroup}) in nearby hospital: ${hosp.name} (${hosp.distanceKm.toFixed(1)} km away, ${exactStock.unitsAvailable} units).`
             };
         }
     }
 
-    // 3b. Search universal blood type 'O-' in nearby hospitals
+    // 3b. Universal O- in nearby hospitals
     for (const hosp of otherHospitals) {
-        const universalStock = db.inventory.find(
-            inv => inv.hospitalId === hosp.id &&
-                   inv.bloodGroup === 'O-' &&
-                   inv.units > 0
+        const universalStock = hosp.bloodStocks.find(
+            s => s.bloodGroup === 'O-' && s.unitsAvailable > 0
         );
         if (universalStock) {
             return {
@@ -133,24 +145,34 @@ export async function findEmergencyDonors(
                 hospitalName: hosp.name,
                 distanceKm: hosp.distanceKm,
                 bloodGroup: 'O-',
-                unitsAvailable: universalStock.units,
+                unitsAvailable: universalStock.unitsAvailable,
                 donors: [],
                 whatsappBroadcastSent: false,
-                message: `Found Universal O- stock in nearby hospital: ${hosp.name} (${hosp.distanceKm.toFixed(1)} km away, ${universalStock.units} units).`
+                message: `Found Universal O- stock in nearby hospital: ${hosp.name} (${hosp.distanceKm.toFixed(1)} km away, ${universalStock.unitsAvailable} units).`
             };
         }
     }
 
     // =========================================================================
-    // STAGE 4: Nearby Verified Individual Donors (Exact Match & Universal O- within 5km)
+    // STAGE 4: Nearby Verified Individual Donors (within 5km)
     // =========================================================================
-    const verifiedDonors = db.donors.filter(d => d.verified === true);
+    const verifiedDonors = await prisma.donor.findMany({
+        where: { verified: true }
+    });
 
-    // 4a. Search exact match donors within 5 km
+    // 4a. Exact match donors within 5km
     const exactMatchDonors = verifiedDonors
+        .filter(d => d.latitude != null && d.longitude != null)
         .map(d => ({
-            ...d,
-            distanceKm: calculateDistance(lat, lon, d.latitude, d.longitude),
+            id: d.id,
+            name: d.name,
+            bloodGroup: d.bloodGroup,
+            phone: d.phone,
+            whatsapp: d.whatsapp,
+            latitude: d.latitude!,
+            longitude: d.longitude!,
+            verified: d.verified,
+            distanceKm: calculateDistance(lat, lon, d.latitude!, d.longitude!),
             matchType: 'Nearby Verified Donor (Exact Match)',
             isUniversalFallback: false
         }))
@@ -158,23 +180,33 @@ export async function findEmergencyDonors(
         .sort((a, b) => a.distanceKm - b.distanceKm);
 
     if (exactMatchDonors.length > 0) {
+        // PRIVACY: Mask donor data before returning
+        const maskedDonors = exactMatchDonors.slice(0, 10).map(d => maskDonorForHospital(d, false));
         return {
             success: true,
             stage: 4,
             stageTitle: 'Stage 4: Verified Nearby Donor (Exact Match)',
             matchType: 'Nearby Donor (Exact Match)',
-            donors: exactMatchDonors.slice(0, 10),
+            donors: maskedDonors,
             whatsappBroadcastSent: false,
             message: `Found verified exact match donor (${requiredBloodGroup}) within 5 km radius.`
         };
     }
 
-    // 4b. Search universal O- donors within 5 km
+    // 4b. Universal O- donors within 5km
     const isPositiveRecipient = requiredBloodGroup.includes('+');
     const fallbackDonors = verifiedDonors
+        .filter(d => d.latitude != null && d.longitude != null)
         .map(d => ({
-            ...d,
-            distanceKm: calculateDistance(lat, lon, d.latitude, d.longitude),
+            id: d.id,
+            name: d.name,
+            bloodGroup: d.bloodGroup,
+            phone: d.phone,
+            whatsapp: d.whatsapp,
+            latitude: d.latitude!,
+            longitude: d.longitude!,
+            verified: d.verified,
+            distanceKm: calculateDistance(lat, lon, d.latitude!, d.longitude!),
             matchType: 'Nearby Verified Donor (Universal O- Fallback)',
             isUniversalFallback: true
         }))
@@ -185,28 +217,30 @@ export async function findEmergencyDonors(
         .sort((a, b) => a.distanceKm - b.distanceKm);
 
     if (fallbackDonors.length > 0) {
+        // PRIVACY: Mask donor data
+        const maskedDonors = fallbackDonors.slice(0, 10).map(d => maskDonorForHospital(d, false));
         return {
             success: true,
             stage: 4,
             stageTitle: 'Stage 4: Verified Nearby Donor (Universal O- Fallback)',
             matchType: 'Nearby Donor (Universal O- Fallback)',
-            donors: fallbackDonors.slice(0, 10),
+            donors: maskedDonors,
             whatsappBroadcastSent: false,
             message: `Found verified Universal O- donor within 5 km radius.`
         };
     }
 
     // =========================================================================
-    // STAGE 5: Automated Emergency WhatsApp Broadcast to All Active Donors
+    // STAGE 5: Automated Emergency WhatsApp Broadcast
+    // PRIVACY: Phone numbers are used SERVER-SIDE only, NEVER returned to frontend
     // =========================================================================
-    const alertedDonors = verifiedDonors.map(d => ({
+    // Server-side: We would send WhatsApp messages here using donor.phone/whatsapp
+    // But we NEVER return those phone numbers to the frontend
+    const alertedDonors = maskBroadcastResult(verifiedDonors.map(d => ({
         id: d.id,
         name: d.name,
-        phone: d.phone,
-        whatsapp: d.whatsapp || d.phone,
         bloodGroup: d.bloodGroup,
-        message: `URGENT HOSPITAL EMERGENCY: No stock or 5km donors available for ${requiredBloodGroup} blood. Please visit ${currentHospital.name} immediately if available for blood donation.`
-    }));
+    })));
 
     return {
         success: false,

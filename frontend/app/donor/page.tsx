@@ -10,6 +10,41 @@ export default function DonorAuth() {
     const [authMode, setAuthMode] = useState<'selection' | 'login' | 'register'>('selection');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [locationStatus, setLocationStatus] = useState('');
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setLocationStatus('GPS failed');
+            return;
+        }
+
+        setLocationStatus('Acquiring GPS...');
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude.toString();
+                const lng = position.coords.longitude.toString();
+                
+                setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+                        headers: { 'User-Agent': 'FastLIFE-BloodDonation/1.0' }
+                    });
+                    const data = await res.json();
+                    if (data && data.display_name) {
+                        setFormData(prev => ({ ...prev, address: data.display_name }));
+                    }
+                } catch (error) {
+                    console.error("Geocoding failed", error);
+                }
+                
+                setLocationStatus('Location found!');
+            },
+            (error) => {
+                setLocationStatus('GPS failed');
+            }
+        );
+    };
 
     const [formData, setFormData] = useState({
         name: '',
@@ -21,6 +56,8 @@ export default function DonorAuth() {
         email: '',
         password: '',
         address: '',
+        latitude: '',
+        longitude: '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -33,7 +70,7 @@ export default function DonorAuth() {
         setErrorMsg('');
         const result = await loginDonor(formData);
 
-        if (result.success) {
+        if (result.success && result.donor) {
             localStorage.setItem('donorProfileId', result.donor.id);
             localStorage.setItem('donorProfile', JSON.stringify(result.donor));
             router.push('/donor/dashboard');
@@ -49,7 +86,7 @@ export default function DonorAuth() {
         setErrorMsg('');
         const result = await registerDonor(formData);
 
-        if (result.success) {
+        if (result.success && result.donor) {
             localStorage.setItem('donorProfileId', result.donor.id);
             localStorage.setItem('donorProfile', JSON.stringify(result.donor));
             router.push('/donor/dashboard');
@@ -176,7 +213,54 @@ export default function DonorAuth() {
 
                         <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                             <label>Address (Real-time Location Based)</label>
-                            <textarea name="address" required rows={3} placeholder="123 Lifeline Ave, City, Country" onChange={handleChange} />
+                            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                <textarea 
+                                    name="address" 
+                                    required 
+                                    rows={3} 
+                                    placeholder="123 Lifeline Ave, City, Country" 
+                                    value={formData.address}
+                                    onChange={handleChange} 
+                                    style={{ flex: 1 }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleGetLocation}
+                                    disabled={locationStatus === 'Acquiring GPS...'}
+                                    style={{
+                                        padding: '0.75rem 1rem',
+                                        background: locationStatus === 'Location found!' 
+                                            ? 'linear-gradient(135deg, #059669, #10B981)' 
+                                            : 'linear-gradient(135deg, #3B82F6, #6366F1)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 'var(--border-radius-sm)',
+                                        cursor: locationStatus === 'Acquiring GPS...' ? 'wait' : 'pointer',
+                                        fontFamily: 'inherit',
+                                        fontWeight: 600,
+                                        fontSize: '0.85rem',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'all 0.3s ease',
+                                        minHeight: '80px',
+                                        display: 'flex',
+                                        flexDirection: 'column' as const,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.25rem',
+                                        boxShadow: '0 2px 8px rgba(59,130,246,0.3)',
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.2rem' }}>{locationStatus === 'Location found!' ? '✅' : '📍'}</span>
+                                    <span style={{ fontSize: '0.7rem' }}>
+                                        {locationStatus || 'Use GPS'}
+                                    </span>
+                                </button>
+                            </div>
+                            {formData.latitude && (
+                                <p style={{ fontSize: '0.75rem', color: '#10B981', marginTop: '0.35rem' }}>
+                                    ✓ GPS: {parseFloat(formData.latitude).toFixed(4)}, {parseFloat(formData.longitude).toFixed(4)}
+                                </p>
+                            )}
                         </div>
 
                         <div className={`${styles.formGroup} ${styles.fullWidth}`}>

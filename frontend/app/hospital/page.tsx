@@ -11,12 +11,36 @@ export default function HospitalDashboard() {
     const [isSearching, setIsSearching] = useState(false);
     const [searchResult, setSearchResult] = useState<any>(null);
 
+    // Review & Ping feature states
+    const [reviewModalReq, setReviewModalReq] = useState<any | null>(null);
+    const [requestStatuses, setRequestStatuses] = useState<{ [key: string]: 'approved' | 'rejected' }>({});
+    const [pingedDonors, setPingedDonors] = useState<string[]>([]);
+    const [pingToast, setPingToast] = useState<string | null>(null);
+
     const handleHospitalSearch = async (bloodType: string) => {
         setIsSearching(true);
         setSelectedBloodGroup(bloodType);
         const result = await findEmergencyDonors(bloodType, 37.7749, -122.4194, '1');
         setIsSearching(false);
         setSearchResult(result);
+    };
+
+    const handleApproveRequest = (reqId: string) => {
+        setRequestStatuses(prev => ({ ...prev, [reqId]: 'approved' }));
+        setReviewModalReq(null);
+    };
+
+    const handleRejectRequest = (reqId: string) => {
+        setRequestStatuses(prev => ({ ...prev, [reqId]: 'rejected' }));
+        setReviewModalReq(null);
+    };
+
+    const handlePingDonor = (donor: any) => {
+        if (!pingedDonors.includes(donor.id)) {
+            setPingedDonors(prev => [...prev, donor.id]);
+            setPingToast(`🚨 Emergency alert sent to ${donor.name} (${donor.bloodGroup}) via SMS and WhatsApp!`);
+            setTimeout(() => setPingToast(null), 5000);
+        }
     };
 
     // Simulated requests for the Blood Needy tab
@@ -28,9 +52,9 @@ export default function HospitalDashboard() {
 
     // Simulated donors for the Donor tab
     const availableDonors = [
-        { id: '1', name: 'Michael Scott', bloodGroup: 'O-', verified: true, lastDonation: '3 months ago' },
-        { id: '2', name: 'Sarah Connor', bloodGroup: 'AB+', verified: true, lastDonation: '6 months ago' },
-        { id: '3', name: 'Jim Halpert', bloodGroup: 'A+', verified: false, lastDonation: 'N/A' },
+        { id: '1', name: 'Michael S.', bloodGroup: 'O-', verified: true, lastDonation: '3 months ago' },
+        { id: '2', name: 'Sarah C.', bloodGroup: 'AB+', verified: true, lastDonation: '6 months ago' },
+        { id: '3', name: 'Jim H.', bloodGroup: 'A+', verified: false, lastDonation: 'N/A' },
     ];
 
     useEffect(() => {
@@ -105,26 +129,119 @@ export default function HospitalDashboard() {
                 </div>
             )}
 
+            {pingToast && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '2rem',
+                    right: '2rem',
+                    background: 'linear-gradient(135deg, #059669, #10B981)',
+                    color: '#ffffff',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+                    zIndex: 1000,
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    animation: 'fadeIn 0.3s ease-in-out'
+                }}>
+                    {pingToast}
+                </div>
+            )}
+
             {activeTab === 'needy' && (
                 <div className={styles.panelCard}>
                     <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary-red)' }}>Incoming Blood Requests</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Patients and nearby hospitals requesting emergency blood transfers.</p>
 
                     <div className={styles.cardList}>
-                        {activeRequests.map(req => (
-                            <div key={req.id} className={styles.cardItem}>
-                                <div className={styles.cardItemInfo}>
-                                    <span className={styles.typeBadge}>{req.type}</span>
-                                    <strong>{req.name}</strong>
-                                    <span style={{ color: '#EF4444', fontWeight: 'bold' }}>Needs {req.bloodGroup}</span>
+                        {activeRequests.map(req => {
+                            const status = requestStatuses[req.id];
+                            return (
+                                <div key={req.id} className={styles.cardItem}>
+                                    <div className={styles.cardItemInfo}>
+                                        <span className={styles.typeBadge}>{req.type}</span>
+                                        <strong>{req.name}</strong>
+                                        <span style={{ color: '#EF4444', fontWeight: 'bold' }}>Needs {req.bloodGroup}</span>
+                                    </div>
+                                    <div className={styles.cardItemActions}>
+                                        <span style={{ color: req.urgency === 'Critical' ? '#EF4444' : '#F59E0B' }}>{req.urgency}</span>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{req.time}</span>
+                                        
+                                        {status === 'approved' ? (
+                                            <span style={{ color: '#10B981', fontWeight: 600, fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(16,185,129,0.1)', borderRadius: '6px' }}>
+                                                ✓ Reserved
+                                            </span>
+                                        ) : status === 'rejected' ? (
+                                            <span style={{ color: '#64748B', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(100,116,139,0.1)', borderRadius: '6px' }}>
+                                                Declined
+                                            </span>
+                                        ) : (
+                                            <button
+                                                className="btn-primary"
+                                                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                                                onClick={() => setReviewModalReq(req)}
+                                            >
+                                                Review
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className={styles.cardItemActions}>
-                                    <span style={{ color: req.urgency === 'Critical' ? '#EF4444' : '#F59E0B' }}>{req.urgency}</span>
-                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{req.time}</span>
-                                    <button className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>Review</button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Review Modal Dialog */}
+            {reviewModalReq && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 999
+                }}>
+                    <div style={{
+                        background: 'var(--surface-color)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '16px',
+                        padding: '2rem',
+                        maxWidth: '500px',
+                        width: '90%',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ color: 'var(--primary-red)', margin: 0 }}>Review Request details</h3>
+                            <button onClick={() => setReviewModalReq(null)} style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                        </div>
+                        
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '10px', marginBottom: '1.5rem', lineHeight: '1.8' }}>
+                            <p style={{ margin: 0 }}>👤 <strong>Requester:</strong> {reviewModalReq.name} ({reviewModalReq.type})</p>
+                            <p style={{ margin: 0 }}>🩸 <strong>Blood Required:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{reviewModalReq.bloodGroup}</span> (2 Units)</p>
+                            <p style={{ margin: 0 }}>⚠️ <strong>Urgency Level:</strong> <span style={{ color: reviewModalReq.urgency === 'Critical' ? '#EF4444' : '#F59E0B', fontWeight: 'bold' }}>{reviewModalReq.urgency}</span></p>
+                            <p style={{ margin: 0 }}>⏱️ <strong>Timestamp:</strong> {reviewModalReq.time}</p>
+                            <p style={{ margin: 0 }}>📍 <strong>Distance:</strong> 1.8 km from hospital</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button
+                                className="btn-secondary"
+                                style={{ padding: '0.75rem 1.25rem', fontSize: '0.9rem' }}
+                                onClick={() => handleRejectRequest(reviewModalReq.id)}
+                            >
+                                Decline Request
+                            </button>
+                            <button
+                                className="btn-primary"
+                                style={{ padding: '0.75rem 1.25rem', fontSize: '0.9rem', backgroundColor: '#10B981', borderColor: '#10B981' }}
+                                onClick={() => handleApproveRequest(reviewModalReq.id)}
+                            >
+                                Approve & Reserve Stock
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -135,19 +252,35 @@ export default function HospitalDashboard() {
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Verified local donors ready to be dispatched during emergencies.</p>
 
                     <div className={styles.cardList}>
-                        {availableDonors.map(donor => (
-                            <div key={donor.id} className={styles.cardItem}>
-                                <div className={styles.cardItemInfo}>
-                                    <strong>{donor.name}</strong>
-                                    <span className={styles.typeBadge}>{donor.bloodGroup}</span>
+                        {availableDonors.map(donor => {
+                            const isPinged = pingedDonors.includes(donor.id);
+                            return (
+                                <div key={donor.id} className={styles.cardItem}>
+                                    <div className={styles.cardItemInfo}>
+                                        <strong>{donor.name}</strong>
+                                        <span className={styles.typeBadge}>{donor.bloodGroup}</span>
+                                    </div>
+                                    <div className={styles.cardItemActions}>
+                                        <span style={{ color: donor.verified ? '#10B981' : '#F59E0B', fontSize: '0.85rem' }}>{donor.verified ? '✓ AI Verified' : '⏳ Pending'}</span>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Last: {donor.lastDonation}</span>
+                                        <button
+                                            className={isPinged ? "btn-primary" : "btn-secondary"}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                fontSize: '0.85rem',
+                                                backgroundColor: isPinged ? '#10B981' : undefined,
+                                                borderColor: isPinged ? '#10B981' : undefined,
+                                                color: isPinged ? '#ffffff' : undefined
+                                            }}
+                                            disabled={!donor.verified || isPinged}
+                                            onClick={() => handlePingDonor(donor)}
+                                        >
+                                            {isPinged ? '✓ Ping Sent' : 'Ping'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className={styles.cardItemActions}>
-                                    <span style={{ color: donor.verified ? '#10B981' : '#F59E0B', fontSize: '0.85rem' }}>{donor.verified ? '✓ AI Verified' : '⏳ Pending'}</span>
-                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Last: {donor.lastDonation}</span>
-                                    <button className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }} disabled={!donor.verified}>Ping</button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -218,7 +351,7 @@ export default function HospitalDashboard() {
                                     {searchResult.donors.map((d: any) => (
                                         <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
-                                            <span>📍 {d.distanceKm.toFixed(1)} km away | Contact: {d.phone}</span>
+                                            <span>📍 {d.distanceKm ? d.distanceKm.toFixed(1) : d.distance} km away</span>
                                         </div>
                                     ))}
                                 </div>
@@ -231,7 +364,7 @@ export default function HospitalDashboard() {
                                     {searchResult.alertedDonors && searchResult.alertedDonors.map((d: any) => (
                                         <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
-                                            <span style={{ color: '#25D366', fontWeight: 'bold' }}>✓ WhatsApp Alert Sent ({d.whatsapp})</span>
+                                            <span style={{ color: '#25D366', fontWeight: 'bold' }}>✓ WhatsApp Alert Sent</span>
                                         </div>
                                     ))}
                                 </div>

@@ -1,5 +1,25 @@
 import fs from 'fs';
 import path from 'path';
+import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+
+// ============================================================
+// PRISMA CLIENT SINGLETON (Primary Database)
+// ============================================================
+
+const adapter = new PrismaBetterSqlite3({ url: 'file:./prisma/dev.db' });
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
+
+if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = prisma;
+}
+
+// ============================================================
+// LEGACY JSON DATABASE (kept for backward compatibility)
+// ============================================================
 
 export const DB_PATH = path.join(process.cwd(), 'database.json');
 

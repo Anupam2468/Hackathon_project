@@ -100,6 +100,9 @@ export default function Navbar() {
                         <Link href="/hospital" className={`${styles.link} ${pathname === '/hospital' ? styles.active : ''}`} onClick={() => setMobileMenuOpen(false)}>
                             Hospital
                         </Link>
+                        <Link href="/find-donors" className={`${styles.link} ${pathname === '/find-donors' ? styles.active : ''}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            📍 Find Donors
+                        </Link>
                         <Link href="/recipient" className={`${styles.link} ${pathname === '/recipient' ? styles.active : ''}`} onClick={() => setMobileMenuOpen(false)}>
                             Recipient
                         </Link>

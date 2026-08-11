@@ -1,0 +1,556 @@
+.container {
+    min-height: 100vh;
+    padding: 90px 2rem 4rem;
+}
+
+.pageHeader {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.pageHeader h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pageHeader p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Search Controls Panel */
+.searchPanel {
+    background: var(--surface-color);
+    border: var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.searchRow {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.searchField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 160px;
+}
+
+.searchField label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.searchField input,
+.searchField select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+
+.searchField select option {
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+}
+
+.searchField input:focus,
+.searchField select:focus {
+    outline: none;
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+}
+
+.radiusField {
+    flex: 1.5;
+    min-width: 200px;
+}
+
+.radiusDisplay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.radiusValue {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-red);
+    background: rgba(225, 29, 72, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--border-radius-full);
+}
+
+.radiusSlider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, var(--primary-red), #F43F5E, #FB923C);
+    border-radius: 3px;
+    outline: none;
+    margin-top: 0.5rem;
+}
+
+.radiusSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.radiusSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.radiusSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    border: none;
+}
+
+.locationBtn {
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    border: none;
+}
+
+.gpsBtn {
+    background: linear-gradient(135deg, #3B82F6, #6366F1);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.gpsBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.gpsBtn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.searchBtn {
+    background: linear-gradient(135deg, var(--primary-red), #F43F5E);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(225, 29, 72, 0.3);
+    padding: 0.75rem 2rem;
+}
+
+.searchBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glow);
+}
+
+.searchBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Main Content Area - Split Layout */
+.mainContent {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.mapSection {
+    position: sticky;
+    top: 100px;
+}
+
+/* Results Sidebar */
+.resultsSidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.resultsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resultsHeader h3 {
+    font-size: 1.2rem;
+}
+
+.resultsCount {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--border-radius-full);
+    border: var(--glass-border);
+}
+
+.donorList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 340px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.donorList::-webkit-scrollbar {
+    width: 4px;
+}
+
+.donorList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.donorList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+/* Donor Card */
+.donorCard {
+    background: var(--surface-color);
+    border: var(--glass-border);
+    border-radius: var(--border-radius-md);
+    padding: 1.25rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.donorCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary-red), #F43F5E);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.donorCard:hover {
+    border-color: rgba(225, 29, 72, 0.3);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.donorCard:hover::before {
+    opacity: 1;
+}
+
+.donorCardTop {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.donorAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-red), #F43F5E);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+}
+
+.donorInfo h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.verifiedTick {
+    color: #3B82F6;
+    font-size: 0.8rem;
+}
+
+.donorInfo p {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.donorCardMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.distanceBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.etaBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #10B981;
+    font-weight: 500;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--border-radius-full);
+}
+
+.bloodBadge {
+    background: rgba(225, 29, 72, 0.12);
+    color: #F43F5E;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Searching / Radar Animation */
+.searchingOverlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.radarContainer {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.radarRing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 2px solid var(--primary-red);
+    border-radius: 50%;
+    animation: radarPulse 2s ease-out infinite;
+}
+
+.radarRing:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.radarRing:nth-child(2) {
+    animation-delay: 0.6s;
+}
+
+.radarRing:nth-child(3) {
+    animation-delay: 1.2s;
+}
+
+@keyframes radarPulse {
+    0% {
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        margin-left: -10px;
+        opacity: 1;
+        border-width: 3px;
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+        margin-left: -60px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+.radarDot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    background: var(--primary-red);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(225, 29, 72, 0.6);
+}
+
+.searchingOverlay h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.searchingOverlay p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.emptyState .emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.emptyState h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* Status bar */
+.statusBar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 0.75rem;
+}
+
+.statusSuccess {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.statusError {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.statusLoading {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .mainContent {
+        grid-template-columns: 1fr;
+    }
+
+    .mapSection {
+        position: static;
+    }
+
+    .donorList {
+        max-height: 500px;
+    }
+
+    .searchRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchField {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 90px 1rem 3rem;
+    }
+
+    .pageHeader h1 {
+        font-size: 1.8rem;
+    }
+
+    .searchPanel {
+        padding: 1.25rem;
+    }
+}
+
+/* Light theme overrides */
+:global(body.light-theme) .searchPanel {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .searchField input,
+:global(body.light-theme) .searchField select {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-primary);
+}
+
+:global(body.light-theme) .donorCard {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .donorCard:hover {
+    border-color: rgba(225, 29, 72, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .donorCardMeta {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+:global(body.light-theme) .resultsCount {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .donorList::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}

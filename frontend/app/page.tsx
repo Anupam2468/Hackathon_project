@@ -61,10 +61,16 @@ export default function Home() {
             <p>Manage blood inventory with ML. Instantly ping local donors when stocks run low or emergencies strike.</p>
           </Link>
 
+          <Link href="/find-donors" className={styles.card}>
+            <div className={styles.cardIcon}>📍</div>
+            <h3>Find Donors Nearby</h3>
+            <p>Uber-style real-time GPS search. Locate verified blood donors near you on an interactive map with live distance & ETA.</p>
+          </Link>
+
           <Link href="/recipient" className={styles.card}>
             <div className={styles.cardIcon}>❤️</div>
             <h3>For Recipients</h3>
-            <p>Check nearby hospital inventory in real-time. Can't find it? Request emergency donors nearby like calling a cab.</p>
+            <p>Check nearby hospital inventory in real-time. Can&apos;t find it? Request emergency donors nearby like calling a cab.</p>
           </Link>
         </div>
       </section>

@@ -6,114 +6,168 @@ datasource db {
   provider = "sqlite"
 }
 
+// ============================================
+// CORE ENTITIES
+// ============================================
+
 model Hospital {
-  hospital_id    String         @id @default(uuid())
+  id             String   @id @default(uuid()) @map("hospital_id")
   name           String
-  location       String
-  verified_badge Boolean        @default(false)
+  location       String   @default("")
+  latitude       Float?
+  longitude      Float?
+  verifiedBadge  Boolean  @default(false) @map("verified_badge")
+
   doctors        Doctor[]
-  blood_stocks   BloodStock[]
+  bloodStocks    BloodStock[]
   camps          Camp[]
   donations      Donation[]
-  blood_requests BloodRequest[]
+  bloodRequests  BloodRequest[]
+
+  @@map("hospitals")
 }
 
 model Doctor {
-  doctor_id      String     @id @default(uuid())
-  hospital_id    String
-  hospital       Hospital   @relation(fields: [hospital_id], references: [hospital_id])
+  id             String   @id @default(uuid()) @map("doctor_id")
+  hospitalId     String   @map("hospital_id")
+  hospital       Hospital @relation(fields: [hospitalId], references: [id])
   name           String
-  verified_badge Boolean    @default(false)
+  verifiedBadge  Boolean  @default(false) @map("verified_badge")
+
   donations      Donation[]
+
+  @@map("doctors")
 }
 
 model BloodStock {
-  stock_id        String   @id @default(uuid())
-  hospital_id     String
-  hospital        Hospital @relation(fields: [hospital_id], references: [hospital_id])
-  blood_group     String
-  units_available Int
+  id              String   @id @default(uuid()) @map("stock_id")
+  hospitalId      String   @map("hospital_id")
+  hospital        Hospital @relation(fields: [hospitalId], references: [id])
+  bloodGroup      String   @map("blood_group")
+  unitsAvailable  Int      @map("units_available")
+
+  @@map("blood_stocks")
 }
 
 model Camp {
-  camp_id     String   @id @default(uuid())
-  hospital_id String
-  hospital    Hospital @relation(fields: [hospital_id], references: [hospital_id])
+  id          String   @id @default(uuid()) @map("camp_id")
+  hospitalId  String   @map("hospital_id")
+  hospital    Hospital @relation(fields: [hospitalId], references: [id])
   location    String
-  camp_date   DateTime
+  campDate    DateTime @map("camp_date")
+
+  @@map("camps")
 }
 
-model Patient {
-  patient_id     String         @id @default(uuid())
-  name           String
-  contact        String
-  blood_requests BloodRequest[]
-}
+// ============================================
+// DONOR (with privacy-sensitive fields)
+// ============================================
 
 model Donor {
-  donor_id              String                @id @default(uuid())
-  name                  String
-  blood_group           String
-  age                   Int
-  weight                Float
-  last_donation_date    DateTime?
-  eligibility_status    String
-  verified_badge        Boolean               @default(false)
-  contact               String
-  health_questionnaires HealthQuestionnaire[]
-  blood_requests        BloodRequest[]
-  notifications         Notification[]
-  donations             Donation[]
+  id                 String    @id @default(uuid()) @map("donor_id")
+  name               String
+  email              String    @unique
+  passwordHash       String    @map("password_hash")
+  bloodGroup         String    @map("blood_group")
+  age                Int
+  gender             String    @default("Male")
+  phone              String
+  whatsapp           String?
+  address            String?
+  latitude           Float?
+  longitude          Float?
+  weight             Float?
+  verified           Boolean   @default(false)
+  aiNotes            String?   @map("ai_notes")
+  eligibilityStatus  String    @default("Eligible") @map("eligibility_status")
+  lastDonationDate   DateTime? @map("last_donation_date")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  healthQuestionnaires HealthQuestionnaire[]
+  bloodRequests        BloodRequest[]
+  notifications        Notification[]
+  donations            Donation[]
+
+  @@map("donors")
 }
 
+// ============================================
+// PATIENT / RECIPIENT
+// ============================================
+
+model Patient {
+  id             String         @id @default(uuid()) @map("patient_id")
+  name           String
+  contact        String
+  bloodRequests  BloodRequest[]
+
+  @@map("patients")
+}
+
+// ============================================
+// TRANSACTIONS & RECORDS
+// ============================================
+
 model HealthQuestionnaire {
-  questionnaire_id String  @id @default(uuid())
-  donor_id         String
-  donor            Donor   @relation(fields: [donor_id], references: [donor_id])
-  weight           Float
-  age              Int
-  medical_history  String
-  eligible         Boolean
+  id              String  @id @default(uuid()) @map("questionnaire_id")
+  donorId         String  @map("donor_id")
+  donor           Donor   @relation(fields: [donorId], references: [id])
+  weight          Float
+  age             Int
+  medicalHistory  String  @map("medical_history")
+  eligible        Boolean
+
+  @@map("health_questionnaires")
 }
 
 model BloodRequest {
-  request_id  String    @id @default(uuid())
-  patient_id  String?
-  patient     Patient?  @relation(fields: [patient_id], references: [patient_id])
-  hospital_id String?
-  hospital    Hospital? @relation(fields: [hospital_id], references: [hospital_id])
-  donor_id    String?
-  donor       Donor?    @relation(fields: [donor_id], references: [donor_id])
-  blood_group String
-  status      String
+  id          String    @id @default(uuid()) @map("request_id")
+  patientId   String?   @map("patient_id")
+  patient     Patient?  @relation(fields: [patientId], references: [id])
+  hospitalId  String?   @map("hospital_id")
+  hospital    Hospital? @relation(fields: [hospitalId], references: [id])
+  donorId     String?   @map("donor_id")
+  donor       Donor?    @relation(fields: [donorId], references: [id])
+  bloodGroup  String    @map("blood_group")
+  status      String    @default("pending")
+  urgency     String    @default("Normal")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("blood_requests")
 }
 
 model Notification {
-  notification_id String   @id @default(uuid())
-  donor_id        String
-  donor           Donor    @relation(fields: [donor_id], references: [donor_id])
-  type            String
-  sent_date       DateTime @default(now())
+  id        String   @id @default(uuid()) @map("notification_id")
+  donorId   String   @map("donor_id")
+  donor     Donor    @relation(fields: [donorId], references: [id])
+  type      String
+  sentDate  DateTime @default(now()) @map("sent_date")
+
+  @@map("notifications")
 }
 
 model Donation {
-  donation_id     String        @id @default(uuid())
-  donor_id        String
-  donor           Donor         @relation(fields: [donor_id], references: [donor_id])
-  hospital_id     String
-  hospital        Hospital      @relation(fields: [hospital_id], references: [hospital_id])
-  doctor_id       String
-  doctor          Doctor        @relation(fields: [doctor_id], references: [doctor_id])
-  donation_date   DateTime      @default(now())
-  lab_test_result String
+  id              String        @id @default(uuid()) @map("donation_id")
+  donorId         String        @map("donor_id")
+  donor           Donor         @relation(fields: [donorId], references: [id])
+  hospitalId      String        @map("hospital_id")
+  hospital        Hospital      @relation(fields: [hospitalId], references: [id])
+  doctorId        String        @map("doctor_id")
+  doctor          Doctor        @relation(fields: [doctorId], references: [id])
+  donationDate    DateTime      @default(now()) @map("donation_date")
+  labTestResult   String        @map("lab_test_result")
   status          String
   certificates    Certificate[]
+
+  @@map("donations")
 }
 
 model Certificate {
-  certificate_id String   @id @default(uuid())
-  donation_id    String
-  donation       Donation @relation(fields: [donation_id], references: [donation_id])
-  pdf_url        String
-  generated_date DateTime @default(now())
+  id             String   @id @default(uuid()) @map("certificate_id")
+  donationId     String   @map("donation_id")
+  donation       Donation @relation(fields: [donationId], references: [id])
+  pdfUrl         String   @map("pdf_url")
+  generatedDate  DateTime @default(now()) @map("generated_date")
+
+  @@map("certificates")
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import styles from './page.module.css';
 import ChatBox from '../components/ChatBox';
 import { findEmergencyDonors } from '../actions/hospital';
@@ -19,16 +19,53 @@ export default function RecipientDashboard() {
     const [chatOpen, setChatOpen] = useState(false);
     const [matchedDonors, setMatchedDonors] = useState<any[]>([]);
     const [searchResult, setSearchResult] = useState<any>(null);
+    const [userLat, setUserLat] = useState<number | null>(null);
+    const [userLng, setUserLng] = useState<number | null>(null);
+    const [locationStatus, setLocationStatus] = useState('');
+    const [requestedHospitals, setRequestedHospitals] = useState<number[]>([]);
 
-    const handleRegister = (e: React.FormEvent) => {
-        e.preventDefault();
-        setTimeout(() => setStep(2), 1000);
+    const handleRequestTransfer = (hospitalId: number) => {
+        if (!requestedHospitals.includes(hospitalId)) {
+            setRequestedHospitals(prev => [...prev, hospitalId]);
+        }
     };
+
+    const handleRegister = useCallback((e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Acquire real GPS location
+        if (navigator.geolocation) {
+            setLocationStatus('Acquiring GPS location...');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLat(position.coords.latitude);
+                    setUserLng(position.coords.longitude);
+                    setLocationStatus('Location acquired!');
+                    setStep(2);
+                },
+                () => {
+                    // GPS denied — use fallback coordinates
+                    setUserLat(22.4839);
+                    setUserLng(87.3245);
+                    setLocationStatus('GPS denied, using approximate location');
+                    setStep(2);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            setUserLat(22.4839);
+            setUserLng(87.3245);
+            setLocationStatus('GPS not available, using approximate location');
+            setStep(2);
+        }
+    }, []);
 
     const handleSearchDonors = async () => {
         setSearchingDonors(true);
-        // Call Backend AI Database Matcher server action
-        const result = await findEmergencyDonors(formData.bloodGroup, 37.77, -122.41);
+        // Use real GPS coordinates acquired during registration
+        const lat = userLat || 22.4839;
+        const lng = userLng || 87.3245;
+        const result = await findEmergencyDonors(formData.bloodGroup, lat, lng);
 
         setSearchingDonors(false);
         setSearchResult(result);
@@ -59,7 +96,14 @@ export default function RecipientDashboard() {
                         </select>
                         <input required type="tel" placeholder="Phone Number" />
 
-                        <button type="submit" className="btn-primary">Allow Location & Find Blood</button>
+                        <button type="submit" className="btn-primary" disabled={locationStatus === 'Acquiring GPS location...'}>
+                            {locationStatus === 'Acquiring GPS location...' ? '📡 Acquiring GPS...' : '📍 Allow Location & Find Blood'}
+                        </button>
+                        {locationStatus && (
+                            <p style={{ fontSize: '0.85rem', color: locationStatus.includes('acquired') ? '#10B981' : locationStatus.includes('denied') ? '#F59E0B' : '#3B82F6', textAlign: 'center', marginTop: '0.5rem' }}>
+                                {locationStatus}
+                            </p>
+                        )}
                     </form>
                 </div>
             )}
@@ -70,6 +114,24 @@ export default function RecipientDashboard() {
                         <h2>Nearby Hospitals for {formData.bloodGroup}</h2>
                         <p>GPS Location Acquired. Live inventory check...</p>
                     </header>
+
+                    {requestedHospitals.length > 0 && (
+                        <div style={{
+                            background: 'rgba(16, 185, 129, 0.1)',
+                            border: '1px solid #10B981',
+                            borderRadius: '8px',
+                            padding: '0.85rem 1.2rem',
+                            marginBottom: '1.25rem',
+                            color: '#10B981',
+                            fontWeight: 600,
+                            fontSize: '0.95rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}>
+                            <span>✅</span> Emergency transfer request dispatched! The hospital is reserving the units for patient {formData.name || 'Recipient'}.
+                        </div>
+                    )}
 
                     <div className={styles.hospitalList}>
                         {nearbyHospitals.map(hosp => (
@@ -84,7 +146,21 @@ export default function RecipientDashboard() {
                                     ) : (
                                         <span className={styles.outOfStock}>❌ Out of Stock</span>
                                     )}
-                                    {hosp.hasStock && <button className="btn-secondary">Request Transfer</button>}
+                                    {hosp.hasStock && (
+                                        <button
+                                            className={requestedHospitals.includes(hosp.id) ? "btn-primary" : "btn-secondary"}
+                                            onClick={() => handleRequestTransfer(hosp.id)}
+                                            disabled={requestedHospitals.includes(hosp.id)}
+                                            style={requestedHospitals.includes(hosp.id) ? {
+                                                backgroundColor: '#10B981',
+                                                borderColor: '#10B981',
+                                                color: '#ffffff',
+                                                cursor: 'default'
+                                            } : undefined}
+                                        >
+                                            {requestedHospitals.includes(hosp.id) ? '✓ Transfer Requested' : 'Request Transfer'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
