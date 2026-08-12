@@ -55,6 +55,23 @@ export default function DonorDashboard() {
                     </div>
                 </div>
 
+                {/* Gamification Badges */}
+                <div className={styles.gamificationSection}>
+                    <h4 style={{ fontSize: '1.1rem', marginBottom: '-0.5rem', marginTop: '0.5rem' }}>Your Badges</h4>
+                    <div className={styles.badgesContainer}>
+                        <div className={styles.badgeItem}>
+                            <span className={styles.badgeIcon}>🩸</span>
+                            <div className={styles.badgeTitle}>First Blood</div>
+                            <div className={styles.badgeDesc}>First Donation</div>
+                        </div>
+                        <div className={styles.badgeItem}>
+                            <span className={styles.badgeIcon}>🌟</span>
+                            <div className={styles.badgeTitle}>Life Saver</div>
+                            <div className={styles.badgeDesc}>3+ Lives Saved</div>
+                        </div>
+                    </div>
+                </div>
+
                 <button
                     className={`btn-primary ${styles.w100}`}
                     onClick={() => setIsAvailable(!isAvailable)}
@@ -71,6 +88,11 @@ export default function DonorDashboard() {
             </aside>
 
             <main className={styles.mainContent}>
+                <div className={styles.heroMessage}>
+                    <h1>You are awsome, Seriously!!</h1>
+                    <p>Your contributions have directly saved lives. Thank you for being a hero.</p>
+                </div>
+
                 <header className={styles.header}>
                     <h2>Emergency Requests Nearby</h2>
                     <p>Real-time location based matching system</p>
@@ -129,6 +151,39 @@ export default function DonorDashboard() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Leaderboard Section */}
+                <div className={styles.gamificationSection} style={{ marginTop: '3rem' }}>
+                    <div className={styles.leaderboardCard}>
+                        <div className={styles.leaderboardHeader}>
+                            <h3>🏆 Local Top Donors</h3>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--primary-red)', fontWeight: 'bold' }}>This Month</span>
+                        </div>
+                        <div className={styles.leaderboardList}>
+                            <div className={styles.leaderboardItem}>
+                                <div className={`${styles.rank} ${styles.top1}`}>1</div>
+                                <div className={styles.donorInfo}>
+                                    <div className={styles.donorName}>Alex Johnson</div>
+                                </div>
+                                <div className={styles.donorScore}>5 Donations</div>
+                            </div>
+                            <div className={styles.leaderboardItem}>
+                                <div className={`${styles.rank} ${styles.top2}`}>2</div>
+                                <div className={styles.donorInfo}>
+                                    <div className={styles.donorName}>Sarah Williams</div>
+                                </div>
+                                <div className={styles.donorScore}>4 Donations</div>
+                            </div>
+                            <div className={`${styles.leaderboardItem} ${styles.isCurrentUser}`}>
+                                <div className={`${styles.rank} ${styles.top3}`}>3</div>
+                                <div className={styles.donorInfo}>
+                                    <div className={styles.donorName}>{profile.name} (You)</div>
+                                </div>
+                                <div className={styles.donorScore}>1 Donation</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

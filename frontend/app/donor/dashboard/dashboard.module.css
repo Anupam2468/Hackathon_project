@@ -177,6 +177,164 @@
     margin-top: 1.5rem;
 }
 
+/* Gamification Styles */
+.gamificationSection {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.heroMessage {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: var(--surface-color);
+    border: var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-glow);
+    animation: float 6s ease-in-out infinite;
+}
+
+.heroMessage h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #10B981, #3B82F6, #8B5CF6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+.heroMessage p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.badgesContainer {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.badgeItem {
+    flex: 1;
+    min-width: 120px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.badgeItem:hover {
+    transform: translateY(-3px) scale(1.02);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--primary-red);
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
+}
+
+.badgeIcon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.badgeTitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.badgeDesc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.leaderboardCard {
+    background: var(--surface-color);
+    border: var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+}
+
+.leaderboardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboardHeader h3 {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.leaderboardList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.leaderboardItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.2s ease;
+}
+
+.leaderboardItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.leaderboardItem.isCurrentUser {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.rank {
+    font-size: 1.25rem;
+    font-weight: 800;
+    width: 30px;
+    text-align: center;
+}
+
+.rank.top1 { color: #F59E0B; } /* Gold */
+.rank.top2 { color: #94A3B8; } /* Silver */
+.rank.top3 { color: #B45309; } /* Bronze */
+
+.donorInfo {
+    flex: 1;
+}
+
+.donorName {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.donorScore {
+    font-size: 0.85rem;
+    color: var(--primary-red);
+    font-weight: 700;
+}
+
 @media (max-width: 900px) {
     .container {
         grid-template-columns: 1fr;

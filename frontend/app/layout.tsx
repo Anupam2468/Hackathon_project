@@ -1,6 +1,14 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from './components/Navbar';
+import HelpGuide from './components/HelpGuide';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: 'FastLIFE | Blood Donation System',
@@ -20,6 +28,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         <main>{children}</main>
+        <HelpGuide />
       </body>
     </html>
   );
