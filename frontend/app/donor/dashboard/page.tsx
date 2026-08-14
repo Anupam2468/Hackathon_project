@@ -1,8 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import styles from './dashboard.module.css';
 import ChatBox from '../../components/ChatBox';
+
+// Dynamically import the map component
+const DonorMap = dynamic(() => import('../../components/DonorMap'), {
+    ssr: false,
+    loading: () => (
+        <div style={{
+            height: '300px',
+            background: 'var(--surface-color)',
+            borderRadius: 'var(--border-radius-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 'var(--glass-border)',
+        }}>
+            <p style={{ color: 'var(--text-secondary)' }}>Loading map...</p>
+        </div>
+    ),
+});
 
 export default function DonorDashboard() {
     const [profile, setProfile] = useState<any>(null);
@@ -132,13 +151,25 @@ export default function DonorDashboard() {
                                 <p style={{ fontSize: '0.85rem', color: '#E2E8F0', marginBottom: '1rem' }}>
                                     🚗 ETA to Main Reception: 12 mins.
                                 </p>
-                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                                     <button className="btn-primary" onClick={() => setChatOpen(true)} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
                                         💬 Open Emergency Chat
                                     </button>
                                     <button className="btn-secondary" onClick={() => setRequestStatus('pending')} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
                                         Cancel
                                     </button>
+                                </div>
+                                
+                                <div style={{ marginTop: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <DonorMap
+                                        center={{ lat: 22.5768, lng: 88.4037 }} // Apollo Gleneagles Hospitals coordinates
+                                        markers={[
+                                            { id: 'h1', type: 'hospital', lat: 22.5768, lng: 88.4037, label: 'Apollo Gleneagles Hospitals' },
+                                            { id: 'user', type: 'user', lat: 22.5800, lng: 88.4000, label: 'Your Location' }
+                                        ]}
+                                        zoom={14}
+                                        height="300px"
+                                    />
                                 </div>
                             </div>
                         )}

@@ -2,9 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
-import { getHospitalInventory, findEmergencyDonors } from '../actions/hospital';
+import { getHospitalInventory, findEmergencyDonors, updateHospitalInventory } from '../actions/hospital';
 
 export default function HospitalDashboard() {
+    // Login State
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [hospitalIdInput, setHospitalIdInput] = useState('');
+    const [passwordInput, setPasswordInput] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'inventory' | 'needy' | 'donors' | 'search'>('inventory');
     const [inventory, setInventory] = useState<any[]>([]);
     const [selectedBloodGroup, setSelectedBloodGroup] = useState('A+');
@@ -58,9 +64,81 @@ export default function HospitalDashboard() {
     ];
 
     useEffect(() => {
-        // Load live inventory from DB Action
-        getHospitalInventory('1').then(data => setInventory(data));
-    }, []);
+        if (isLoggedIn) {
+            // Load live inventory from DB Action
+            getHospitalInventory('1').then(data => setInventory(data));
+        }
+    }, [isLoggedIn]);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Dummy authentication check
+        if (hospitalIdInput.toLowerCase() === 'h1' || hospitalIdInput.toLowerCase() === 'admin') {
+            setIsLoggedIn(true);
+        } else {
+            setLoginError('Invalid Hospital ID or Password. Try "h1"');
+        }
+    };
+
+    const handleInventoryChange = (id: string, newUnits: string) => {
+        const units = parseInt(newUnits) || 0;
+        setInventory(prev => prev.map(item => item.id === id ? { ...item, units } : item));
+    };
+
+    const handleSaveChanges = async () => {
+        setIsSaving(true);
+        try {
+            for (const item of inventory) {
+                await updateHospitalInventory(item.id, item.units);
+            }
+        } finally {
+            setIsSaving(false);
+            getHospitalInventory('1').then(data => setInventory(data));
+        }
+    };
+
+    if (!isLoggedIn) {
+        return (
+            <div className={styles.loginContainer}>
+                <div className={styles.loginCard}>
+                    <h1 className="heading-gradient-red" style={{ textAlign: 'center', marginBottom: '0.5rem', fontSize: '2rem' }}>Hospital Login</h1>
+                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Access your blood bank command center</p>
+                    
+                    {loginError && <div className={styles.errorAlert}>{loginError}</div>}
+                    
+                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        <div className={styles.formGroup}>
+                            <label>Hospital ID / Username</label>
+                            <input 
+                                type="text" 
+                                required 
+                                value={hospitalIdInput} 
+                                onChange={e => setHospitalIdInput(e.target.value)} 
+                                placeholder="e.g. h1"
+                                className={styles.inputField}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Password</label>
+                            <input 
+                                type="password" 
+                                required 
+                                value={passwordInput} 
+                                onChange={e => setPasswordInput(e.target.value)} 
+                                placeholder="••••••••"
+                                className={styles.inputField}
+                            />
+                        </div>
+                        <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>Sign In</button>
+                    </form>
+                    <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px' }}>
+                        <p style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Demo Credentials:</p>
+                        <p>ID: <span style={{ color: 'white' }}>h1</span> | Password: <span style={{ color: 'white' }}>any</span></p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -101,13 +179,25 @@ export default function HospitalDashboard() {
             {activeTab === 'inventory' && (
                 <div className={styles.grid}>
                     <div className={styles.inventory}>
-                        <h2>Live Blood Inventory</h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                            <h2 style={{ margin: 0 }}>Live Blood Inventory</h2>
+                            <button className="btn-primary" onClick={handleSaveChanges} disabled={isSaving}>
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
                         <div className={styles.inventoryGrid}>
                             {inventory.length > 0 ? inventory.map(item => (
                                 <div key={item.id} className={`${styles.invCard} ${styles[item.status.toLowerCase()]}`}>
                                     <h3>{item.bloodGroup}</h3>
                                     <div className={styles.amount}>
-                                        <span className={styles.units}>{item.units}</span> units
+                                        <input 
+                                            type="number" 
+                                            value={item.units} 
+                                            onChange={(e) => handleInventoryChange(item.id, e.target.value)}
+                                            className={styles.inventoryInput}
+                                            min="0"
+                                        />
+                                        <span className={styles.unitsLabel}>units</span>
                                     </div>
                                     <div className={styles.status}>{item.status}</div>
                                 </div>

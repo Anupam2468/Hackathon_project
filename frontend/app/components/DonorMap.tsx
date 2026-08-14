@@ -43,7 +43,7 @@ export default function DonorMap({ center, markers, zoom = 13, height = '500px',
 
             // Wait for CSS to load
             setTimeout(() => {
-                if (!mapRef.current) return;
+                if (!mapRef.current || (mapRef.current as any)._leaflet_id) return;
 
                 const map = L.map(mapRef.current, {
                     zoomControl: true,

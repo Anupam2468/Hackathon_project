@@ -64,6 +64,7 @@ export default function FindDonorsPage() {
     const [donors, setDonors] = useState<DonorResult[]>([]);
     const [hospitals, setHospitals] = useState<HospitalResult[]>([]);
     const [selectedDonorId, setSelectedDonorId] = useState<string | null>(null);
+    const [requestedDonors, setRequestedDonors] = useState<Set<string>>(new Set());
 
     // Get GPS location
     const handleGetGPS = useCallback(() => {
@@ -81,6 +82,7 @@ export default function FindDonorsPage() {
                 setUserLat(lat);
                 setUserLng(lng);
                 setLocationStatus('Location acquired!');
+                setHasSearched(false);
 
                 // Reverse geocode for display
                 try {
@@ -115,6 +117,7 @@ export default function FindDonorsPage() {
             setUserLng(result.longitude!);
             setLocationAddress(result.displayName || addressSearch);
             setLocationStatus('Location found!');
+            setHasSearched(false);
         } else {
             setLocationStatus('Address not found. Try a different query.');
         }
@@ -142,7 +145,23 @@ export default function FindDonorsPage() {
         setHospitals(hospitalResult.hospitals || []);
         setIsSearching(false);
         setHasSearched(true);
+        setRequestedDonors(new Set()); // Reset on new search
     }, [userLat, userLng, bloodGroup, radius]);
+
+    // Handle sending blood request
+    const handleSendRequest = useCallback((donorId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setRequestedDonors(prev => {
+            const newSet = new Set(prev);
+            newSet.add(donorId);
+            return newSet;
+        });
+        // In a real app, this would call a server action like `createBloodRequest(hospitalId, donorId, ...)`
+    }, []);
+
+    const handleSendBulkRequest = useCallback(() => {
+        setRequestedDonors(new Set(donors.map(d => d.id)));
+    }, [donors]);
 
     // Auto-search on first GPS acquisition
     useEffect(() => {
@@ -343,10 +362,22 @@ export default function FindDonorsPage() {
                     {/* Results List */}
                     <div className={styles.resultsSidebar}>
                         <div className={styles.resultsHeader}>
-                            <h3>Nearby Donors</h3>
-                            <span className={styles.resultsCount}>
-                                {donors.length} found within {radius} km
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <h3>Nearby Donors</h3>
+                                <span className={styles.resultsCount}>
+                                    {donors.length} found within {radius} km
+                                </span>
+                            </div>
+                            {donors.length > 0 && (
+                                <button 
+                                    className="btn-primary" 
+                                    onClick={handleSendBulkRequest}
+                                    style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
+                                    disabled={requestedDonors.size === donors.length}
+                                >
+                                    {requestedDonors.size === donors.length ? '✅ All Requested' : '🚀 Request All'}
+                                </button>
+                            )}
                         </div>
 
                         {donors.length === 0 ? (
@@ -382,12 +413,27 @@ export default function FindDonorsPage() {
                                         </div>
 
                                         <div className={styles.donorCardMeta}>
-                                            <span className={styles.distanceBadge}>
-                                                📍 {donor.distance} km
-                                            </span>
-                                            <span className={styles.etaBadge}>
-                                                🚗 ETA: {donor.eta}
-                                            </span>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <span className={styles.distanceBadge}>
+                                                    📍 {donor.distance} km
+                                                </span>
+                                                <span className={styles.etaBadge}>
+                                                    🚗 ETA: {donor.eta}
+                                                </span>
+                                            </div>
+                                            <button 
+                                                className={`btn-primary ${styles.acceptBtn}`}
+                                                onClick={(e) => handleSendRequest(donor.id, e)}
+                                                disabled={requestedDonors.has(donor.id)}
+                                                style={{
+                                                    fontSize: '0.75rem', 
+                                                    padding: '0.25rem 0.75rem',
+                                                    background: requestedDonors.has(donor.id) ? '#10B981' : undefined,
+                                                    borderColor: requestedDonors.has(donor.id) ? '#10B981' : undefined,
+                                                }}
+                                            >
+                                                {requestedDonors.has(donor.id) ? '✅ Sent' : 'Send Request'}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}

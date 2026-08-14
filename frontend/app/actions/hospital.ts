@@ -28,6 +28,14 @@ export async function getHospitalInventory(hospitalId: string = 'h1') {
     }));
 }
 
+export async function updateHospitalInventory(stockId: string, unitsAvailable: number) {
+    await prisma.bloodStock.update({
+        where: { id: stockId },
+        data: { unitsAvailable }
+    });
+    return { success: true };
+}
+
 // 5-Stage Hospital Segment Emergency Blood Search Engine
 export async function findEmergencyDonors(
     requiredBloodGroup: string,

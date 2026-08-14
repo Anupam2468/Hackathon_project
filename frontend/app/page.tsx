@@ -1,5 +1,6 @@
 import styles from './page.module.css';
 import Link from 'next/link';
+import CampaignCarousel from './components/CampaignCarousel';
 
 export default function Home() {
   return (
@@ -45,6 +46,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <CampaignCarousel />
 
       <section className={styles.features}>
         <h2 className="heading-gradient">Who are you?</h2>
