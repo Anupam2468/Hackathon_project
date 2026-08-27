@@ -59,12 +59,16 @@ export default function CampaignCarousel() {
                                     src={camp.image} 
                                     alt={camp.title} 
                                     fill 
+                                    sizes="(max-width: 640px) 270px, 320px"
                                     style={{ objectFit: 'cover' }}
                                 />
                             </div>
                             <div className={styles.posterOverlay}>
-                                <h3>{camp.title}</h3>
-                                <span>Click to Register</span>
+                                <div className={styles.campaignInfo}>
+                                    <h3 className={styles.campaignTitle}>{camp.title}</h3>
+                                    <span className={styles.campaignDate}>{camp.date}</span>
+                                </div>
+                                <span className={styles.ctaText}>Click to Register &rarr;</span>
                             </div>
                         </div>
                     ))}

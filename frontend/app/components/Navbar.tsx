@@ -55,7 +55,35 @@ export default function Navbar() {
                 <div className={styles.logoAndToggle}>
                     <div className={styles.logo}>
                         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                            <span className={styles.logoIcon}>❤️</span> FastLIFE
+                            <span className={styles.logoIcon}>
+                                <svg
+                                    width="20"
+                                    height="28"
+                                    viewBox="0 0 24 32"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className={styles.logoDrop}
+                                    aria-hidden="true"
+                                >
+                                    <defs>
+                                        <linearGradient id="navbarBloodDropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#ff6379" />
+                                            <stop offset="100%" stopColor="#db2a4a" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path
+                                        d="M12 2.5C12 2.5 4 14.2 4 21.5C4 26.2 7.6 30 12 30C16.4 30 20 26.2 20 21.5C20 14.2 12 2.5 12 2.5Z"
+                                        fill="url(#navbarBloodDropGrad)"
+                                    />
+                                    <path
+                                        d="M8.5 17.5C8.5 14 10.2 9.5 12 6"
+                                        stroke="rgba(255, 255, 255, 0.45)"
+                                        strokeWidth="1.75"
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                            </span>
+                            FastLIFE
                         </Link>
                     </div>
 
@@ -69,9 +97,10 @@ export default function Navbar() {
                             {theme === 'dark' ? '☀️' : '🌙'}
                         </button>
                         <button
-                            className={styles.hamburger}
+                            className={`${styles.hamburger} ${mobileMenuOpen ? styles.hamburgerOpen : ''}`}
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             aria-label="Toggle Menu"
+                            aria-expanded={mobileMenuOpen}
                             type="button"
                         >
                             <span></span>

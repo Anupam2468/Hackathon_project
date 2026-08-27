@@ -4,6 +4,17 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { getHospitalInventory, findEmergencyDonors, updateHospitalInventory } from '../actions/hospital';
 
+type OutreachWave = { wave: number; donorCount: number; radiusKm: number; action: string };
+
+const tabs = [
+    { id: 'inventory', label: 'Inventory' },
+    { id: 'needy', label: 'Requests' },
+    { id: 'donors', label: 'Donors' },
+    { id: 'search', label: '🚨 Emergency' }
+] as const;
+
+type TabId = typeof tabs[number]['id'];
+
 export default function HospitalDashboard() {
     // Login State
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,7 +22,7 @@ export default function HospitalDashboard() {
     const [passwordInput, setPasswordInput] = useState('');
     const [loginError, setLoginError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<'inventory' | 'needy' | 'donors' | 'search'>('inventory');
+    const [activeTab, setActiveTab] = useState<TabId>('inventory');
     const [inventory, setInventory] = useState<any[]>([]);
     const [selectedBloodGroup, setSelectedBloodGroup] = useState('A+');
     const [isSearching, setIsSearching] = useState(false);
@@ -44,7 +55,7 @@ export default function HospitalDashboard() {
     const handlePingDonor = (donor: any) => {
         if (!pingedDonors.includes(donor.id)) {
             setPingedDonors(prev => [...prev, donor.id]);
-            setPingToast(`🚨 Emergency alert sent to ${donor.name} (${donor.bloodGroup}) via SMS and WhatsApp!`);
+            setPingToast(`Outreach for ${donor.name} (${donor.bloodGroup}) is queued for hospital staff review.`);
             setTimeout(() => setPingToast(null), 5000);
         }
     };
@@ -140,47 +151,44 @@ export default function HospitalDashboard() {
         );
     }
 
+    const activeTabIndex = tabs.findIndex(t => t.id === activeTab);
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
                 <div>
                     <h1 className="heading-gradient-red">Hospital Command Center</h1>
-                    <p>Manage inventory, incoming requests, and donors in real-time.</p>
+                    <p>Coordinate inventory, requests, and donor outreach. Clinical teams remain responsible for screening, compatibility, and release.</p>
                 </div>
             </header>
 
             <div className={styles.tabRow}>
-                <button
-                    className={activeTab === 'inventory' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => setActiveTab('inventory')}
-                >
-                    Inventory
-                </button>
-                <button
-                    className={activeTab === 'needy' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => setActiveTab('needy')}
-                >
-                    Requests
-                </button>
-                <button
-                    className={activeTab === 'donors' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => setActiveTab('donors')}
-                >
-                    Donors
-                </button>
-                <button
-                    className={activeTab === 'search' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => setActiveTab('search')}
-                >
-                    🚨 Emergency
-                </button>
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        className={activeTab === tab.id ? styles.activeTab : ''}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+                <div 
+                    className={styles.tabIndicator} 
+                    style={{ 
+                        width: `${100 / tabs.length}%`, 
+                        transform: `translateX(${activeTabIndex * 100}%)` 
+                    }} 
+                />
             </div>
 
             {activeTab === 'inventory' && (
                 <div className={styles.grid}>
                     <div className={styles.inventory}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                            <h2 style={{ margin: 0 }}>Live Blood Inventory</h2>
+                            <div>
+                                <h2 style={{ margin: 0 }}>Blood inventory signal</h2>
+                                <p style={{ margin: '0.35rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Verify tested, releasable stock and reservation status before committing a unit.</p>
+                            </div>
                             <button className="btn-primary" onClick={handleSaveChanges} disabled={isSaving}>
                                 {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
@@ -206,13 +214,20 @@ export default function HospitalDashboard() {
                     </div>
 
                     <div className={styles.aiPanel}>
-                        <h2>AI Inventory Insights</h2>
+                        <h2>Operational insights</h2>
 
                         <div className={styles.insightCard}>
                             <div className={styles.iconWarning}>⚠️</div>
                             <div>
-                                <h4>Critical Shortage Predicted</h4>
-                                <p>O- stocks are depleting 40% faster than average. Suggestion: Ping local verified donors from the Donor tab.</p>
+                                <h4>Review O- stock threshold</h4>
+                                <p>O- is below the local threshold in this demo. Consider preparing exact-match donor outreach; any fallback route needs blood-bank and clinician approval.</p>
+                            </div>
+                        </div>
+                        <div className={styles.insightCard} style={{ marginTop: '1rem' }}>
+                            <div className={styles.iconWarning}>⏱️</div>
+                            <div>
+                                <h4>Response standard</h4>
+                                <p>Demo target: acknowledge emergency requests within 5 minutes and refresh inventory status before commitment.</p>
                             </div>
                         </div>
                     </div>
@@ -220,20 +235,7 @@ export default function HospitalDashboard() {
             )}
 
             {pingToast && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    background: 'linear-gradient(135deg, #059669, #10B981)',
-                    color: '#ffffff',
-                    padding: '1rem 1.5rem',
-                    borderRadius: '12px',
-                    boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
-                    zIndex: 1000,
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    animation: 'fadeIn 0.3s ease-in-out'
-                }}>
+                <div className={styles.toast}>
                     {pingToast}
                 </div>
             )}
@@ -284,39 +286,22 @@ export default function HospitalDashboard() {
 
             {/* Review Modal Dialog */}
             {reviewModalReq && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    backdropFilter: 'blur(6px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 999
-                }}>
-                    <div style={{
-                        background: 'var(--surface-color)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        borderRadius: '16px',
-                        padding: '2rem',
-                        maxWidth: '500px',
-                        width: '90%',
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ color: 'var(--primary-red)', margin: 0 }}>Review Request details</h3>
+                <div className={styles.reviewOverlay}>
+                    <div className={styles.reviewModal}>
+                        <div className={styles.reviewHeader}>
+                            <h3>Review Request details</h3>
                             <button onClick={() => setReviewModalReq(null)} style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                         </div>
                         
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '10px', marginBottom: '1.5rem', lineHeight: '1.8' }}>
-                            <p style={{ margin: 0 }}>👤 <strong>Requester:</strong> {reviewModalReq.name} ({reviewModalReq.type})</p>
-                            <p style={{ margin: 0 }}>🩸 <strong>Blood Required:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{reviewModalReq.bloodGroup}</span> (2 Units)</p>
-                            <p style={{ margin: 0 }}>⚠️ <strong>Urgency Level:</strong> <span style={{ color: reviewModalReq.urgency === 'Critical' ? '#EF4444' : '#F59E0B', fontWeight: 'bold' }}>{reviewModalReq.urgency}</span></p>
-                            <p style={{ margin: 0 }}>⏱️ <strong>Timestamp:</strong> {reviewModalReq.time}</p>
-                            <p style={{ margin: 0 }}>📍 <strong>Distance:</strong> 1.8 km from hospital</p>
+                        <div className={styles.reviewDetails}>
+                            <p>👤 <strong>Requester:</strong> {reviewModalReq.name} ({reviewModalReq.type})</p>
+                            <p>🩸 <strong>Blood Required:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{reviewModalReq.bloodGroup}</span> (2 Units)</p>
+                            <p>⚠️ <strong>Urgency Level:</strong> <span style={{ color: reviewModalReq.urgency === 'Critical' ? '#EF4444' : '#F59E0B', fontWeight: 'bold' }}>{reviewModalReq.urgency}</span></p>
+                            <p>⏱️ <strong>Timestamp:</strong> {reviewModalReq.time}</p>
+                            <p>📍 <strong>Distance:</strong> 1.8 km from hospital</p>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                        <div className={styles.reviewActions}>
                             <button
                                 className="btn-secondary"
                                 style={{ padding: '0.75rem 1.25rem', fontSize: '0.9rem' }}
@@ -339,7 +324,7 @@ export default function HospitalDashboard() {
             {activeTab === 'donors' && (
                 <div className={styles.panelCard}>
                     <h2 style={{ marginBottom: '1.5rem', color: '#10B981' }}>Willing Donors Directory</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Verified local donors ready to be dispatched during emergencies.</p>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Potential donors are privacy-masked until they accept and the hospital selects them. Verification is preliminary; on-site screening is still required.</p>
 
                     <div className={styles.cardList}>
                         {availableDonors.map(donor => {
@@ -351,7 +336,7 @@ export default function HospitalDashboard() {
                                         <span className={styles.typeBadge}>{donor.bloodGroup}</span>
                                     </div>
                                     <div className={styles.cardItemActions}>
-                                        <span style={{ color: donor.verified ? '#10B981' : '#F59E0B', fontSize: '0.85rem' }}>{donor.verified ? '✓ AI Verified' : '⏳ Pending'}</span>
+                                        <span style={{ color: donor.verified ? '#10B981' : '#F59E0B', fontSize: '0.85rem' }}>{donor.verified ? '✓ Identity & record reviewed' : '⏳ Review pending'}</span>
                                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Last: {donor.lastDonation}</span>
                                         <button
                                             className={isPinged ? "btn-primary" : "btn-secondary"}
@@ -365,7 +350,7 @@ export default function HospitalDashboard() {
                                             disabled={!donor.verified || isPinged}
                                             onClick={() => handlePingDonor(donor)}
                                         >
-                                            {isPinged ? '✓ Ping Sent' : 'Ping'}
+                                            {isPinged ? '✓ Outreach queued' : 'Queue outreach'}
                                         </button>
                                     </div>
                                 </div>
@@ -377,9 +362,9 @@ export default function HospitalDashboard() {
 
             {activeTab === 'search' && (
                 <div className={styles.panelCard}>
-                    <h2 style={{ marginBottom: '0.5rem', color: '#EF4444' }}>🚨 5-Stage Hospital Emergency Search Engine</h2>
+                    <h2 style={{ marginBottom: '0.5rem', color: '#EF4444' }}>🚨 Emergency coordination route</h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                        Executes sequential 5-stage fallback: 1. Primary Hospital Stock (Exact) &rarr; 2. Primary Hospital (O-) &rarr; 3. Nearby Hospitals Stock &rarr; 4. Donors (5km) &rarr; 5. Automated Emergency WhatsApp Broadcast
+                        Checks exact primary stock, flags any potential O- route for clinical review, searches nearby exact stock, finds nearby verified exact-match donors, then creates a staff-reviewed escalation queue.
                     </p>
 
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
@@ -397,36 +382,61 @@ export default function HospitalDashboard() {
                     </div>
 
                     {isSearching && (
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '8px', textAlign: 'center' }}>
+                        <div className={styles.searchProgress}>
                             <div className={styles.radar} style={{ margin: '0 auto 1rem auto' }}></div>
-                            <h3>Executing 5-Stage Sequential Emergency Scan for {selectedBloodGroup}...</h3>
-                            <p style={{ color: 'var(--text-secondary)' }}>Checking Hospital Inventories & Distance Radius...</p>
+                            <h3>Checking safe coordination routes for {selectedBloodGroup}...</h3>
+                            <p style={{ color: 'var(--text-secondary)' }}>Checking exact inventory, clinical review needs, partner hospitals, and verified donors…</p>
                         </div>
                     )}
 
                     {!isSearching && searchResult && (
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <div style={{
-                                display: 'inline-block',
-                                padding: '0.4rem 1rem',
-                                borderRadius: '20px',
-                                fontWeight: 'bold',
-                                fontSize: '0.95rem',
-                                marginBottom: '1rem',
-                                background: searchResult.stage === 5 ? '#25D366' : '#10B981',
-                                color: '#000'
-                            }}>
+                        <div className={styles.searchResultBox}>
+                            <div className={`${styles.stageBadge} ${searchResult.stage === 5 ? styles.stageBadgeGreen : styles.stageBadgeTeal}`}>
                                 {searchResult.stageTitle}
                             </div>
 
-                            <h3 style={{ fontSize: '1.4rem', color: searchResult.stage === 5 ? '#25D366' : '#10B981', marginBottom: '0.5rem' }}>
+                            <h3 className={styles.matchTitle} style={{ color: searchResult.stage === 5 ? '#25D366' : '#10B981' }}>
                                 {searchResult.matchType}
                             </h3>
-                            <p style={{ color: '#E2E8F0', fontSize: '1.1rem', marginBottom: '1.5rem' }}>{searchResult.message}</p>
+                            <p className={styles.matchDesc}>{searchResult.message}</p>
+
+                            {searchResult.confidence && (
+                                <div className={styles.confidenceBox}>
+                                    <div className={`${styles.scoreCircle} ${searchResult.confidence.score >= 75 ? styles.scoreHigh : searchResult.confidence.score >= 45 ? styles.scoreMedium : styles.scoreLow}`}>
+                                        {searchResult.confidence.score}
+                                    </div>
+                                    <div>
+                                        <strong>Emergency Confidence: {searchResult.confidence.label}</strong>
+                                        <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>{searchResult.confidence.factors.join(' • ')}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {searchResult.outreachPlan && (
+                                <div className={styles.outreachPlan}>
+                                    <h4 style={{ color: '#10B981', marginBottom: '0.75rem' }}>Progressive outreach plan</h4>
+                                    {searchResult.outreachPlan.map((wave: OutreachWave) => (
+                                        <p key={wave.wave} style={{ margin: '0.45rem 0', fontSize: '0.9rem' }}><strong>Wave {wave.wave}:</strong> {wave.donorCount} donor{wave.donorCount === 1 ? '' : 's'} within {wave.radiusKm} km — {wave.action}</p>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchResult.rareGroupEscalation?.enabled && (
+                                <div className={styles.rareGroupEscalation}>
+                                    <strong style={{ color: '#C4B5FD' }}>Rare blood-group route</strong>
+                                    <p style={{ margin: '0.35rem 0 0', color: 'var(--text-secondary)' }}>{searchResult.rareGroupEscalation.message}</p>
+                                </div>
+                            )}
+
+                            {searchResult.clinicalReviewRequired && (
+                                <div className={styles.clinicalReview}>
+                                    <strong style={{ color: '#F59E0B' }}>Clinical decision required.</strong> The platform is only surfacing a possibility; clinician-approved protocols, testing, and release are required before use.
+                                </div>
+                            )}
 
                             {/* Stages 1, 2, 3: Hospital Inventory Match */}
                             {searchResult.stage >= 1 && searchResult.stage <= 3 && (
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+                                <div className={styles.hospitalMatch}>
                                     <p style={{ margin: '0.3rem 0' }}>📍 <strong>Matched Hospital:</strong> {searchResult.hospitalName}</p>
                                     <p style={{ margin: '0.3rem 0' }}>🩸 <strong>Blood Type:</strong> <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{searchResult.bloodGroup}</span></p>
                                     <p style={{ margin: '0.3rem 0' }}>📦 <strong>Units Available:</strong> {searchResult.unitsAvailable} Units</p>
@@ -436,10 +446,10 @@ export default function HospitalDashboard() {
 
                             {/* Stage 4: Donor Match within 5km */}
                             {searchResult.stage === 4 && searchResult.donors && searchResult.donors.length > 0 && (
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
+                                <div className={styles.donorMatch}>
                                     <h4 style={{ color: '#F59E0B', marginBottom: '0.8rem' }}>Matched Nearby Individual Donors (Within 5 km):</h4>
                                     {searchResult.donors.map((d: any) => (
-                                        <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div key={d.id} className={styles.donorRow}>
                                             <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
                                             <span>📍 {d.distanceKm ? d.distanceKm.toFixed(1) : d.distance} km away</span>
                                         </div>
@@ -447,14 +457,14 @@ export default function HospitalDashboard() {
                                 </div>
                             )}
 
-                            {/* Stage 5: WhatsApp Emergency Broadcast Dispatched */}
+                            {/* Stage 5: Staff-approved notification escalation */}
                             {searchResult.stage === 5 && (
-                                <div style={{ background: 'rgba(37,211,102,0.1)', padding: '1.2rem', borderRadius: '8px', borderLeft: '4px solid #25D366' }}>
-                                    <h4 style={{ color: '#25D366', marginBottom: '0.8rem' }}>📲 Emergency WhatsApp Broadcast Logs:</h4>
+                                <div className={styles.staffQueue}>
+                                    <h4 style={{ color: '#25D366', marginBottom: '0.8rem' }}>📲 Staff-approved outreach queue:</h4>
                                     {searchResult.alertedDonors && searchResult.alertedDonors.map((d: any) => (
-                                        <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div key={d.id} className={styles.donorRow}>
                                             <span>👤 <strong>{d.name}</strong> ({d.bloodGroup})</span>
-                                            <span style={{ color: '#25D366', fontWeight: 'bold' }}>✓ WhatsApp Alert Sent</span>
+                                            <span style={{ color: '#25D366', fontWeight: 'bold' }}>Queued for review</span>
                                         </div>
                                     ))}
                                 </div>

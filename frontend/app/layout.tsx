@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from './components/Navbar';
 import HelpGuide from './components/HelpGuide';
+import Footer from './components/Footer';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -11,8 +12,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'FastLIFE | Blood Donation System',
-  description: 'Connect with donors, hospitals and recipients in real-time.',
+  title: 'FastLIFE | Emergency Blood Coordination',
+  description: 'Hospital-led blood inventory, verified donor coordination, and transparent emergency status.',
 };
 
 export default function RootLayout({
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         <main>{children}</main>
+        <Footer />
         <HelpGuide />
       </body>
     </html>

@@ -4,6 +4,20 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+.bgSvg {
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 800px;
+    height: 800px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+    fill: var(--primary-red);
 }
 
 .formWrapper {
@@ -14,6 +28,86 @@
     width: 100%;
     max-width: 800px;
     padding: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stepIndicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.stepIndicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-50%);
+    z-index: -1;
+}
+
+.step {
+    background: var(--surface-color);
+    border: 2px solid rgba(255,255,255,0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    box-shadow: 0 0 15px rgba(240, 68, 95, 0.2);
+}
+
+.authGrid {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.authCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.authCard:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-red);
+    box-shadow: 0 10px 30px rgba(240, 68, 95, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.authIcon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.authTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
 }
 
 .header {
@@ -75,27 +169,79 @@
     color: var(--text-primary);
 }
 
-.formGroup input:focus,
+.formGroup input:not([type="file"]):focus,
 .formGroup select:focus,
 .formGroup textarea:focus {
     outline: none;
-    border-color: var(--primary-red);
-    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+    border-color: transparent;
+    background: linear-gradient(var(--surface-color), var(--surface-color)) padding-box,
+                linear-gradient(135deg, var(--primary-red), #ff7e5f) border-box;
+    border: 1px solid transparent;
+    box-shadow: 0 0 15px rgba(240, 68, 95, 0.2);
 }
 
 .fileInput {
     background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    padding: 2rem;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    padding: 2.5rem;
     border-radius: var(--border-radius-md);
     text-align: center;
     cursor: pointer;
     transition: all var(--transition-fast);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: transparent; /* hide native text */
+}
+
+.fileInput::before {
+    content: '📁';
+    font-size: 2rem;
+    color: initial;
+}
+
+.fileInput::after {
+    content: 'Drag & Drop files here or click to browse';
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: block;
 }
 
 .fileInput:hover {
     border-color: var(--primary-red);
-    background: rgba(225, 29, 72, 0.05);
+    background: rgba(240, 68, 95, 0.05);
+}
+
+.locationBtn {
+    padding: 0.75rem 1rem;
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.locationBtn.found {
+    background: linear-gradient(135deg, #059669, #10B981);
+}
+.locationBtn.searching {
+    background: linear-gradient(135deg, #3B82F6, #6366F1);
+    cursor: wait;
+}
+.locationBtn.idle {
+    background: linear-gradient(135deg, #3B82F6, #6366F1);
+    cursor: pointer;
 }
 
 .submitBtn {
@@ -108,6 +254,12 @@
 .submitBtn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .authGrid {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 600px) {
@@ -128,12 +280,39 @@
     .formWrapper h1 {
         font-size: 1.5rem;
     }
+    
+    .bgSvg {
+        width: 400px;
+        height: 400px;
+    }
 }
 
 /* Light theme overrides */
 :global(body.light-theme) .formWrapper {
     background: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .stepIndicator::before {
+    background: rgba(0,0,0,0.1);
+}
+:global(body.light-theme) .step {
+    background: #FFFFFF;
+    border-color: rgba(0,0,0,0.1);
+}
+
+:global(body.light-theme) .authCard {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .authCard:hover {
+    background: #FAFAFA;
+}
+
+:global(body.light-theme) .bgSvg {
+    fill: var(--primary-red);
+    opacity: 0.05;
 }
 
 :global(body.light-theme) .formGroup input:not([type="file"]),
@@ -144,7 +323,14 @@
     color: var(--text-primary);
 }
 
+:global(body.light-theme) .formGroup input:not([type="file"]):focus,
+:global(body.light-theme) .formGroup select:focus,
+:global(body.light-theme) .formGroup textarea:focus {
+    background: #FFFFFF;
+    border-color: var(--primary-red);
+}
+
 :global(body.light-theme) .fileInput {
     background: rgba(0, 0, 0, 0.01);
-    border: 1px dashed rgba(0, 0, 0, 0.15);
+    border: 2px dashed rgba(0, 0, 0, 0.15);
 }

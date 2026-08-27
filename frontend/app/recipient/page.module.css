@@ -30,18 +30,27 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.2rem;
 }
 
 .form input,
 .form select {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem;
+    padding: 1rem 1.2rem;
     border-radius: var(--border-radius-sm);
     color: var(--text-primary);
     font-family: inherit;
     font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form input:focus,
+.form select:focus {
+    outline: none;
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 2px rgba(240, 68, 95, 0.2);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .form select option {
@@ -51,7 +60,7 @@
 
 .form button {
     margin-top: 1rem;
-    padding: 1rem;
+    padding: 1.1rem;
     font-size: 1.1rem;
 }
 
@@ -73,7 +82,7 @@
 .hospitalList {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     margin-bottom: 3rem;
 }
 
@@ -85,6 +94,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hospitalCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-glow);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .hospInfo h3 {
@@ -93,7 +109,7 @@
 
 .hospInfo p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .hospStatus {
@@ -113,9 +129,64 @@
     font-weight: 600;
 }
 
+/* Timeline */
+.timeline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    position: relative;
+}
+
+.timelineConnector {
+    position: absolute;
+    top: 1.2rem;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: repeating-linear-gradient(to right, rgba(255,255,255,0.1) 0, rgba(255,255,255,0.1) 5px, transparent 5px, transparent 10px);
+    z-index: 0;
+}
+
+.timelineStep {
+    flex: 1;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.timelineStep strong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: 0 auto 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    font-size: 0.8rem;
+}
+
+.timelineStepActive {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10B981;
+}
+
+.timelineStepActive strong {
+    background: #10B981;
+    color: #fff;
+}
+
+/* Specific Sections */
 .emergencySection {
-    background: rgba(225, 29, 72, 0.05);
-    border: 1px solid rgba(225, 29, 72, 0.2);
+    background: rgba(225, 29, 72, 0.03);
+    border: 1px solid rgba(225, 29, 72, 0.15);
     border-radius: var(--border-radius-lg);
     padding: 2.5rem;
     text-align: center;
@@ -123,13 +194,57 @@
 
 .emergencySection h3 {
     font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     color: var(--primary-red);
 }
 
 .emergencySection p {
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.emergencyBtn {
+    position: relative;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: var(--border-radius-md);
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.emergencyBtn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+    animation: pulseRing 2s infinite linear;
+    z-index: -1;
+}
+
+.emergencyBtn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(240, 68, 95, 0.4);
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
 }
 
 .trackingOverlay {
@@ -138,7 +253,7 @@
     align-items: center;
     gap: 1rem;
     padding: 2rem;
-    background: rgba(30, 41, 59, 1);
+    background: var(--surface-color);
     border-radius: var(--border-radius-lg);
     border: var(--glass-border);
     box-shadow: var(--shadow-glow);
@@ -169,7 +284,6 @@
         transform: translate(-50%, -50%) scale(0.5);
         opacity: 1;
     }
-
     100% {
         transform: translate(-50%, -50%) scale(2.5);
         opacity: 0;
@@ -177,10 +291,60 @@
 }
 
 .donorMatch {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    padding: 2rem;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1.5rem;
     border-radius: var(--border-radius-lg);
+    margin-top: 1rem;
+}
+
+.confidenceScore {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: var(--border-radius-md);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.confidenceScore p {
+    margin: 0.35rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.outreachPlan {
+    text-align: left;
+}
+
+.outreachPlan h3 {
+    color: #10B981;
+    margin-bottom: 1rem;
+}
+
+.outreachPlan p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+.clinicalReview {
+    border: 2px solid #F59E0B;
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.clinicalReview h3 {
+    color: #F59E0B;
+    margin-bottom: 0.5rem;
+}
+
+.rareGroupAlert {
+    border-color: #8B5CF6;
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.rareGroupAlert h3 {
+    color: #C4B5FD;
+    margin-bottom: 0.5rem;
 }
 
 .matchBadge {
@@ -239,6 +403,15 @@
     .dashboard h2 {
         font-size: 1.3rem;
     }
+
+    .timeline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .timelineConnector {
+        display: none;
+    }
 }
 
 /* Light theme overrides */
@@ -247,6 +420,15 @@
     background: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.12);
     color: var(--text-primary);
+}
+
+:global(body.light-theme) .form input:focus,
+:global(body.light-theme) .form select:focus {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+:global(body.light-theme) .hospitalCard:hover {
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
 :global(body.light-theme) .trackingOverlay {
@@ -258,3 +440,35 @@
     background: rgba(16, 185, 129, 0.06);
     border-color: rgba(16, 185, 129, 0.2);
 }
+
+:global(body.light-theme) .timelineStep {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:global(body.light-theme) .timelineStep strong {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+:global(body.light-theme) .timelineStepActive {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+:global(body.light-theme) .confidenceScore {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+:global(body.light-theme) .clinicalReview {
+    background: rgba(245, 158, 11, 0.05);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+:global(body.light-theme) .rareGroupAlert {
+    background: rgba(139, 92, 246, 0.05);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+:global(body.light-theme) .rareGroupAlert h3 {
+    color: #7C3AED;
+}

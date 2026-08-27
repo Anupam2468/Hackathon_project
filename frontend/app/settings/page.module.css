@@ -1,0 +1,453 @@
+.container {
+    min-height: 100vh;
+    padding: 100px 1.5rem 5rem;
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+/* ===== Header ===== */
+.header {
+    text-align: center;
+    position: relative;
+    padding: 1.5rem 1rem 0.5rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 1rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(8px);
+}
+
+.title {
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    margin-bottom: 0.85rem;
+    letter-spacing: -0.03em;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 580px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ===== Stack of Settings Cards ===== */
+.cardsStack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.settingsCard {
+    padding: 2.25rem;
+    border-radius: var(--border-radius-lg);
+    border: var(--glass-border);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.settingsCard:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(255, 232, 237, 0.2);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.cardHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.cardIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.cardTitle {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+}
+
+.cardHeaderBadge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.28rem 0.7rem;
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--border-color);
+}
+
+/* ===== Toggle Rows ===== */
+.toggleList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.toggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.15rem 1.35rem;
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.toggleRow:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.toggleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+}
+
+.toggleLabelRow {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.toggleLabel {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+}
+
+.toggleDesc {
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.5;
+}
+
+.comingSoonBadge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--border-radius-full);
+    background: rgba(86, 217, 179, 0.12);
+    color: var(--signal-mint);
+    border: 1px solid rgba(86, 217, 179, 0.28);
+    white-space: nowrap;
+}
+
+.toggleControl {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* ===== Styled Toggle Switch ===== */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.14);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.switch input:checked + .slider {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+    box-shadow: 0 0 12px rgba(240, 68, 95, 0.4);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.switch input:focus-visible + .slider {
+    outline: 2px solid var(--primary-red);
+    outline-offset: 2px;
+}
+
+/* ===== Account Profile Card ===== */
+.profileCardContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.profileLeft {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0445f 0%, #7e49a3 100%);
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    box-shadow: 0 8px 20px rgba(240, 68, 95, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.profileDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profileName {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profileMeta {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.profileBadge {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--border-radius-full);
+    background: rgba(86, 217, 179, 0.14);
+    color: var(--signal-mint);
+    font-weight: 700;
+    border: 1px solid rgba(86, 217, 179, 0.25);
+}
+
+.accountActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.infoNotice {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.statusIndicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--signal-mint);
+    box-shadow: 0 0 6px var(--signal-mint);
+}
+
+/* ===== Toast Notification ===== */
+.toastNotice {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface-elevated);
+    border: 1px solid var(--primary-red);
+    color: var(--text-primary);
+    padding: 0.85rem 1.4rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    animation: fadeIn 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ===== Light Theme Overrides ===== */
+:global(body.light-theme) .settingsCard {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+:global(body.light-theme) .toggleRow {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+:global(body.light-theme) .toggleRow:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+:global(body.light-theme) .slider {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+:global(body.light-theme) .slider:before {
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+:global(body.light-theme) .badge,
+:global(body.light-theme) .cardHeaderBadge {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Responsive Breakpoints ===== */
+@media (max-width: 900px) {
+    .container {
+        padding: 90px 1.25rem 4rem;
+    }
+
+    .settingsCard {
+        padding: 1.85rem 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: 85px 1rem 3rem;
+        gap: 2rem;
+    }
+
+    .header {
+        padding: 1rem 0.5rem 0;
+    }
+
+    .title {
+        font-size: 2.1rem;
+    }
+
+    .subtitle {
+        font-size: 0.98rem;
+    }
+
+    .settingsCard {
+        padding: 1.5rem 1.15rem;
+    }
+
+    .toggleRow {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .profileCardContent {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profileLeft {
+        width: 100%;
+    }
+
+    .accountActions {
+        width: 100%;
+    }
+
+    .accountActions button,
+    .accountActions a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .toastNotice {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        text-align: center;
+        justify-content: center;
+    }
+}

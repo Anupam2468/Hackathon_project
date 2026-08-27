@@ -62,6 +62,7 @@ export function maskDonorForPublic(donor: any) {
         verified: donor.verified ?? donor.verified_badge ?? false,
         // Distance data (computed server-side, never raw coordinates)
         distance: donor.distance,
+        distanceKm: donor.distanceKm,
         eta: donor.eta,
         direction: donor.direction,
         // Approximate location for map (offset by ~200m for privacy)
@@ -75,7 +76,7 @@ export function maskDonorForPublic(donor: any) {
  * 
  * CAN SEE: Same as public + matchType indicator
  * CANNOT SEE: Contact info, exact location, personal details
- * UNLOCKS: Contact info ONLY after donor accepts the request (isAccepted=true)
+ * UNLOCKS: Contact info ONLY after donor accepts and hospital workflow authorizes it.
  */
 export function maskDonorForRecipient(donor: any, isAccepted: boolean = false) {
     const base = maskDonorForPublic(donor);
@@ -152,8 +153,8 @@ export function maskRequestForDonor(request: any) {
 /**
  * PRIVACY RULE: WhatsApp Emergency Broadcast (Stage 5)
  * 
- * The backend sends WhatsApp messages but NEVER returns phone numbers to the frontend.
- * Frontend only sees: count of donors notified + masked names.
+ * A production notification provider may be invoked server-side, but phone numbers
+ * are never returned to the frontend. The UI can only show masked queue entries.
  */
 export function maskBroadcastResult(donors: any[]) {
     return donors.map(d => ({
